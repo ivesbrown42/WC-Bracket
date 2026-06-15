@@ -1,0 +1,94 @@
+.tabs {
+  display: flex;
+  gap: var(--wc-space-2);
+  overflow-x: auto;
+  padding: var(--wc-space-2) 0 var(--wc-space-3);
+  scrollbar-width: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+.tab {
+  flex-shrink: 0;
+  padding: var(--wc-space-2) var(--wc-space-4);
+  border-radius: var(--wc-radius-pill);
+  border: 2px solid var(--wc-color-paper-edge);
+  background: var(--wc-color-paper-raised);
+  font-family: var(--wc-font-body);
+  font-weight: var(--wc-weight-bold);
+  font-size: var(--wc-text-xs);
+  letter-spacing: var(--wc-tracking-wide);
+  text-transform: uppercase;
+  color: var(--wc-color-ink-soft);
+}
+.tabCurrent {
+  background: var(--wc-color-ink-base);
+  color: var(--wc-color-ink-inverse);
+  border-color: var(--wc-color-ink-base);
+}
+.tabDone {
+  border-color: var(--wc-color-accent-green);
+}
+
+.matches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--wc-space-4) var(--wc-space-3);
+  margin-top: var(--wc-space-2);
+}
+.matchesSingle {
+  grid-template-columns: 1fr;
+  max-width: 320px;
+  margin-inline: auto;
+}
+
+.roundHead {
+  text-align: center;
+  margin: var(--wc-space-2) 0 var(--wc-space-1);
+}
+.roundTitle {
+  font-size: var(--wc-text-2xl);
+}
+.roundSub {
+  font-size: var(--wc-text-xs);
+  color: var(--wc-color-ink-faint);
+  text-transform: uppercase;
+  letter-spacing: var(--wc-tracking-wide);
+}
+
+.champBanner {
+  text-align: center;
+  padding: var(--wc-space-5) var(--wc-space-4);
+  margin-bottom: var(--wc-space-4);
+}
+.champEyebrow {
+  color: var(--wc-color-foil-deep);
+}
+.champName {
+  font-size: var(--wc-text-3xl);
+  margin: var(--wc-space-2) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--wc-space-2);
+}
+
+.gate {
+  text-align: center;
+  margin-top: 20vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--wc-space-4);
+}
+
+.tpWrap {
+  margin-top: var(--wc-space-6);
+}
+.tpLabel {
+  text-align: center;
+  margin-bottom: var(--wc-space-2);
+}

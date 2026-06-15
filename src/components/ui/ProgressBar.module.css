@@ -1,0 +1,38 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-2);
+}
+
+.track {
+  display: flex;
+  gap: 3px;
+  width: 100%;
+}
+
+.segment {
+  flex: 1;
+  height: 10px;
+  border-radius: var(--wc-radius-pill);
+  background: var(--wc-color-paper-sunk);
+  border: 1.5px solid var(--wc-color-paper-edge);
+  box-shadow: var(--wc-shadow-inset);
+  transition: background-color var(--wc-dur-base) var(--wc-ease-standard);
+}
+
+.filled {
+  background: var(--wc-color-accent-green);
+  border-color: var(--wc-color-state-pick-ink);
+  box-shadow: none;
+}
+
+.label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.count {
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-base);
+  color: var(--wc-color-ink-base);
+}

@@ -1,0 +1,114 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-4);
+  align-items: center;
+}
+
+/* The exportable share card */
+.card {
+  width: 100%;
+  max-width: 360px;
+  padding: var(--wc-space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--wc-space-3);
+  text-align: center;
+}
+.brand {
+  color: var(--wc-color-accent-red);
+}
+.trophy {
+  font-size: 64px;
+  line-height: 1;
+  filter: drop-shadow(2px 3px 0 var(--wc-color-foil-deep));
+}
+.champFlag {
+  font-size: 40px;
+}
+.champName {
+  font-size: var(--wc-text-3xl);
+  line-height: 1;
+}
+.champLabel {
+  color: var(--wc-color-foil-deep);
+}
+
+.podium {
+  display: flex;
+  justify-content: center;
+  gap: var(--wc-space-3);
+  width: 100%;
+  margin-top: var(--wc-space-2);
+}
+.podSlot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--wc-space-2);
+  background: var(--wc-color-paper-base);
+  border: 2px solid var(--wc-color-paper-edge);
+  border-radius: var(--wc-radius-md);
+}
+.podRank {
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-lg);
+}
+.podFlag {
+  font-size: 24px;
+}
+.podName {
+  font-size: 11px;
+  font-weight: var(--wc-weight-bold);
+}
+
+.path {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-2);
+}
+.pathRow {
+  display: flex;
+  align-items: center;
+  gap: var(--wc-space-3);
+  font-size: var(--wc-text-sm);
+}
+.pathRound {
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-xs);
+  width: 44px;
+  color: var(--wc-color-ink-faint);
+  flex-shrink: 0;
+}
+.pathBeat {
+  color: var(--wc-color-ink-soft);
+}
+.pathBeat b {
+  color: var(--wc-color-ink-base);
+}
+
+.actions {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-2);
+}
+.sectionLabel {
+  align-self: flex-start;
+  margin-top: var(--wc-space-2);
+}
+
+.gate {
+  text-align: center;
+  margin-top: 18vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--wc-space-4);
+}

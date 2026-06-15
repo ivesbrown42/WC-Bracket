@@ -1,0 +1,88 @@
+/* Global base styles — all values come from design tokens via CSS vars. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--wc-font-body);
+  font-size: var(--wc-text-base);
+  line-height: var(--wc-leading-normal);
+  color: var(--wc-color-ink-base);
+  background-color: var(--wc-color-paper-base);
+  /* Aged-paper grain: layered soft speckles + a warm vignette */
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(251, 244, 223, 0.6), transparent 60%),
+    radial-gradient(rgba(43, 34, 24, 0.05) 1px, transparent 1px),
+    radial-gradient(rgba(43, 34, 24, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 14px 14px, 22px 22px;
+  background-position: 0 0, 0 0, 7px 11px;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-regular);
+  line-height: var(--wc-leading-tight);
+  letter-spacing: var(--wc-tracking-tight);
+  text-transform: uppercase;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 3px solid var(--wc-color-accent-blue);
+  outline-offset: 2px;
+}
+
+/* Respect reduced-motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Utility: the eyebrow / ALL-CAPS label look used throughout */
+.wc-eyebrow {
+  font-family: var(--wc-font-body);
+  font-weight: var(--wc-weight-bold);
+  font-size: var(--wc-text-xs);
+  letter-spacing: var(--wc-tracking-wider);
+  text-transform: uppercase;
+  color: var(--wc-color-ink-soft);
+}
+
+#root {
+  min-height: 100dvh;
+}

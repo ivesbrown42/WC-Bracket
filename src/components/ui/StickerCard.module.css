@@ -1,0 +1,58 @@
+.card {
+  position: relative;
+  background: var(--wc-color-paper-raised);
+  border-radius: var(--wc-radius-lg);
+  box-shadow: var(--wc-shadow-sticker);
+  border: 2px solid var(--wc-color-paper-edge);
+  /* faint printed inner highlight, sells the embossed sticker look */
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0) 38%
+  );
+  transition:
+    transform var(--wc-dur-fast) var(--wc-ease-bounce),
+    box-shadow var(--wc-dur-fast) var(--wc-ease-standard);
+}
+
+.interactive {
+  cursor: pointer;
+}
+.interactive:hover {
+  transform: translateY(-2px) rotate(-0.4deg);
+  box-shadow: var(--wc-shadow-lifted);
+}
+.interactive:active {
+  transform: translateY(1px);
+  box-shadow: var(--wc-shadow-sm);
+}
+
+/* Gold foil treatment for special stickers (champion, etc.) */
+.foil {
+  border-color: var(--wc-color-foil-gold);
+  box-shadow: var(--wc-shadow-foil), var(--wc-shadow-sticker);
+  background-image: linear-gradient(
+    135deg,
+    rgba(241, 210, 122, 0.55),
+    rgba(255, 255, 255, 0) 40%,
+    rgba(201, 162, 39, 0.25)
+  );
+}
+
+/* Peeled corner — a little dog-ear like a sticker lifting off the page */
+.peel::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(
+    135deg,
+    transparent 46%,
+    var(--wc-color-paper-edge) 47%,
+    var(--wc-color-paper-sunk) 100%
+  );
+  border-top-right-radius: var(--wc-radius-lg);
+  box-shadow: -2px 2px 3px rgba(43, 34, 24, 0.18);
+}

@@ -1,0 +1,65 @@
+.card {
+  padding: var(--wc-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-3);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--wc-space-3);
+}
+.groupLabel {
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-2xl);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.hint {
+  margin-left: auto;
+  font-size: var(--wc-text-xs);
+  color: var(--wc-color-ink-faint);
+  text-align: right;
+  text-transform: uppercase;
+  letter-spacing: var(--wc-tracking-wide);
+  font-weight: var(--wc-weight-bold);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-2);
+}
+
+.rankBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--wc-radius-pill);
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-sm);
+  border: 2px solid var(--wc-color-paper-raised);
+  color: var(--wc-color-ink-inverse);
+  background: var(--wc-color-ink-faint);
+  flex-shrink: 0;
+}
+.qualify {
+  background: var(--wc-color-accent-green);
+}
+.third {
+  background: var(--wc-color-accent-mustard);
+  color: var(--wc-color-ink-base);
+}
+.out {
+  background: var(--wc-color-ink-faint);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-space-2);
+  margin-top: var(--wc-space-1);
+}

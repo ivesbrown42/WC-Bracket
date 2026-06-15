@@ -1,0 +1,30 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 var(--wc-space-2);
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-base);
+  line-height: 1;
+  color: var(--wc-color-ink-inverse);
+  background: var(--wc-color-ink-base);
+  border-radius: var(--wc-radius-pill);
+  border: 2px solid var(--wc-color-paper-raised);
+  box-shadow: var(--wc-shadow-sm);
+}
+
+.red {
+  background: var(--wc-color-accent-red);
+}
+.blue {
+  background: var(--wc-color-accent-blue);
+}
+.gold {
+  background: var(--wc-color-foil-gold);
+  color: var(--wc-color-ink-base);
+}
+.green {
+  background: var(--wc-color-accent-green);
+}

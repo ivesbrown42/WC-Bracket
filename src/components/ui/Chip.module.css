@@ -1,0 +1,32 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-space-1);
+  padding: var(--wc-space-1) var(--wc-space-3);
+  font-family: var(--wc-font-body);
+  font-weight: var(--wc-weight-bold);
+  font-size: var(--wc-text-xs);
+  letter-spacing: var(--wc-tracking-wide);
+  text-transform: uppercase;
+  color: var(--wc-color-ink-base);
+  background: var(--wc-color-paper-sunk);
+  border: 1.5px solid var(--wc-color-paper-edge);
+  border-radius: var(--wc-radius-pill);
+  white-space: nowrap;
+}
+
+.solid {
+  color: var(--wc-color-ink-inverse);
+  background: var(--wc-color-ink-base);
+  border-color: var(--wc-color-ink-base);
+}
+.gold {
+  color: var(--wc-color-ink-base);
+  background: var(--wc-color-foil-light);
+  border-color: var(--wc-color-foil-gold);
+}
+.green {
+  color: var(--wc-color-ink-inverse);
+  background: var(--wc-color-accent-green);
+  border-color: var(--wc-color-accent-green);
+}
