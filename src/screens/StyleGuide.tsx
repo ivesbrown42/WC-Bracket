@@ -10,8 +10,11 @@ import {
   StickerCard,
   TeamSticker,
 } from '../components/ui'
+import { ThemeSwatch } from '../components/theme'
 import { color, radius, shadow, space, typography } from '../design/tokens'
 import { getTeam } from '../data/worldCup2026'
+import { DEFAULT_THEME, PATTERNS } from '../data/theme'
+import type { BorderPattern } from '../data/theme'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -152,6 +155,17 @@ export function StyleGuide() {
           <TeamSticker team={sample2} picked />
           <TeamSticker team={getTeam('QAT')} eliminated />
           <TeamSticker emptyLabel="Winner Group A" />
+        </div>
+      </Section>
+
+      <Section title="Team Theme">
+        <div style={{ display: 'flex', gap: space[3], flexWrap: 'wrap', alignItems: 'center' }}>
+          {PATTERNS.slice(0, 4).map((p) => (
+            <div key={p.id} style={{ textAlign: 'center' }}>
+              <ThemeSwatch theme={{ ...DEFAULT_THEME, pattern: p.id as BorderPattern }} size={56} />
+              <div style={{ fontSize: 11, marginTop: 6, color: color.ink.soft }}>{p.label}</div>
+            </div>
+          ))}
         </div>
       </Section>
 

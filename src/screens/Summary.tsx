@@ -4,6 +4,7 @@ import { toPng } from 'html-to-image'
 import { Screen } from '../components/layout/Screen'
 import { Button, Chip } from '../components/ui'
 import { BracketVisual } from '../components/bracket/BracketVisual'
+import { ThemeFrame } from '../components/theme'
 import { useBracketStore } from '../store/bracketStore'
 import { getChampion, knockoutReady, resolveKnockout } from '../data/bracketLogic'
 import type { BracketPicks } from '../data/types'
@@ -103,7 +104,9 @@ export function Summary({ shared }: SummaryProps) {
 
         {/* The exportable bracket visual */}
         <div ref={cardRef}>
-          <BracketVisual resolved={resolved} />
+          <ThemeFrame inline>
+            <BracketVisual resolved={resolved} />
+          </ThemeFrame>
         </div>
 
         {/* Actions */}

@@ -60,6 +60,9 @@ export function Home() {
           >
             {started ? 'Continue Bracket' : 'Start Your Bracket'}
           </Button>
+          <Button variant="secondary" block onClick={() => navigate('/theme')}>
+            🎨 Choose Your Team Colors
+          </Button>
           {ready && (
             <Button variant="gold" block onClick={() => navigate('/summary')}>
               🎉 View Your Bracket

@@ -1,0 +1,136 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-4);
+}
+
+.preview {
+  position: sticky;
+  top: var(--wc-space-3);
+  z-index: 5;
+}
+
+.previewContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--wc-space-2);
+  padding: var(--wc-space-4);
+}
+
+.flagBig {
+  font-size: 72px;
+}
+
+.teamName {
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-lg);
+  letter-spacing: var(--wc-tracking-tight);
+  text-transform: uppercase;
+  color: var(--wc-color-ink-base);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-2);
+}
+
+.sectionTitle {
+  color: var(--wc-color-ink-soft);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-space-2);
+}
+
+/* 8-column flag grid */
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: var(--wc-space-2);
+}
+
+.teamBtn {
+  aspect-ratio: 1;
+  font-size: 28px;
+  border-radius: var(--wc-radius-md);
+  border: 2px solid var(--wc-color-paper-edge);
+  background: var(--wc-color-paper-raised);
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.teamBtn:hover {
+  transform: scale(1.08);
+  border-color: var(--wc-color-ink-soft);
+}
+
+.teamBtnActive {
+  border-color: var(--wc-color-foil-gold);
+  outline: 3px solid var(--wc-color-foil-gold);
+  outline-offset: -1px;
+}
+
+/* Pattern selector: scrollable row */
+.patternRow {
+  display: flex;
+  gap: var(--wc-space-2);
+  overflow-x: auto;
+  padding-bottom: var(--wc-space-1);
+}
+
+.patternBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--wc-space-2);
+  border-radius: var(--wc-radius-md);
+  border: 2px solid var(--wc-color-paper-edge);
+  background: var(--wc-color-paper-raised);
+  font-size: var(--wc-text-xs);
+  font-weight: var(--wc-weight-bold);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.patternLabel {
+  max-width: 44px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.patternBtnActive {
+  border-color: var(--wc-color-ink-base);
+  background: var(--wc-color-paper-base);
+}
+
+/* Color selector: pill buttons */
+.colorRow {
+  display: flex;
+  gap: var(--wc-space-2);
+  flex-wrap: wrap;
+}
+
+.colorBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--wc-radius-pill);
+  border: 2px solid var(--wc-color-ink-base);
+  cursor: pointer;
+}
+
+.colorBtnActive {
+  outline: 3px solid var(--wc-color-foil-gold);
+  outline-offset: 2px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-2);
+  margin-top: var(--wc-space-3);
+}

@@ -1,0 +1,50 @@
+/* ── Fixed viewport frame ── */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+}
+.barTop,
+.barBottom,
+.barLeft,
+.barRight {
+  position: absolute;
+}
+.barTop {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+}
+.barBottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+}
+.barLeft {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 12px;
+}
+.barRight {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+}
+
+/* ── Inline frame (card) ── */
+.inline {
+  padding: 16px;
+  border-radius: var(--wc-radius-lg);
+  border: 3px solid;
+  box-shadow: var(--wc-shadow-sticker);
+}
+.inlineInner {
+  background: var(--wc-color-paper-base);
+  border-radius: calc(var(--wc-radius-lg) - 8px);
+  overflow: hidden;
+}

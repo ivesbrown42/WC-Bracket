@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Screen } from '../components/layout/Screen'
 import { Button, Chip, Confetti, Flag } from '../components/ui'
 import { MatchCard } from '../components/bracket/MatchCard'
+import { ThemeFrame } from '../components/theme'
 import { useBracketStore } from '../store/bracketStore'
 import { knockoutMatches, getTeam } from '../data/worldCup2026'
 import { getChampion, knockoutReady, resolveKnockout } from '../data/bracketLogic'
@@ -111,6 +112,7 @@ export function Bracket() {
   return (
     <Screen title="Knockout" back="/groups" wide>
       {party && <Confetti />}
+      <ThemeFrame />
 
       <div className={styles.tabs}>
         {ROUNDS.map((r) => {
