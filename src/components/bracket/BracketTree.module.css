@@ -1,0 +1,76 @@
+.tree {
+  overflow-x: auto;
+  padding-bottom: var(--wc-space-4);
+}
+
+/* Round label row */
+.labels {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--wc-space-3);
+  padding: 0 var(--wc-space-2);
+}
+
+.roundLabel {
+  width: 220px;
+  flex-shrink: 0;
+  font-family: var(--wc-font-body);
+  font-size: var(--wc-text-xs);
+  font-weight: var(--wc-weight-bold);
+  letter-spacing: var(--wc-tracking-wider);
+  text-transform: uppercase;
+  color: var(--wc-color-ink-faint);
+  text-align: center;
+}
+
+.connectorSpacer {
+  width: 24px;
+  flex-shrink: 0;
+}
+
+/* Match columns */
+.columns {
+  display: flex;
+  align-items: stretch;
+  min-width: max-content;
+}
+
+/* QF + SF round columns */
+.round {
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+  flex-shrink: 0;
+  gap: var(--wc-space-2);
+}
+
+/* QF slots — equal height, content top-aligned */
+.slot {
+  flex: 1;
+}
+
+/* SF slots — equal height, match centered vertically */
+.sfSlot {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Final column */
+.finalCol {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.finalSlot {
+  width: 100%;
+}
+
+/* Connector column — stretches to match adjacent round height */
+.connector {
+  width: 24px;
+  flex-shrink: 0;
+  position: relative;
+}

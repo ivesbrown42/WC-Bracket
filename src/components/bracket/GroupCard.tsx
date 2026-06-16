@@ -31,7 +31,7 @@ export function GroupCard({
         <Badge tone="red">{groupId}</Badge>
         <span className={styles.groupLabel}>Group {groupId}</span>
         <span className={styles.hint}>
-          {ranks.length >= 3 ? 'Tap to re-order' : 'Tap to rank →'}
+          {ranks.length >= 2 ? '✓ Top 2 picked' : 'Tap to pick your top 2'}
         </span>
       </div>
 

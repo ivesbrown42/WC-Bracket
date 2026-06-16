@@ -32,8 +32,8 @@ export function Home() {
         </div>
 
         <h1 className={styles.title}>
-          Sticker
-          <span>Cup '26</span>
+          World Cup
+          <span>'26</span>
         </h1>
         <p className={styles.subtitle}>
           Fill out your World Cup 2026 bracket, pick a champion, and share your

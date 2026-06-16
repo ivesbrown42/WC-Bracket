@@ -14,10 +14,12 @@ import styles from './Bracket.module.css'
 const ROUNDS: { id: RoundId; label: string; short: string }[] = [
   { id: 'R32', label: 'Round of 32', short: 'R32' },
   { id: 'R16', label: 'Round of 16', short: 'R16' },
-  { id: 'QF', label: 'Quarterfinals', short: 'QF' },
-  { id: 'SF', label: 'Semifinals', short: 'SF' },
-  { id: 'F', label: 'The Final', short: 'Final' },
+  { id: 'QF',  label: 'Quarter-finals', short: 'QF' },
+  { id: 'SF',  label: 'Semi-finals', short: 'SF' },
+  { id: 'F',   label: 'The Final', short: 'Final' },
 ]
+
+const ROUND_ORDER: RoundId[] = ['R32', 'R16', 'QF', 'SF', 'F']
 
 export function Bracket() {
   const navigate = useNavigate()
@@ -28,20 +30,42 @@ export function Bracket() {
   const resolved = useMemo(() => resolveKnockout(picks), [picks])
   const champion = getTeam(getChampion(picks))
 
-  // Default to the earliest round that still has an undecided match.
+  const isRoundComplete = (r: RoundId) =>
+    knockoutMatches
+      .filter((m) => m.round === r)
+      .every((m) => resolved.get(m.id)?.winnerTeamId != null)
+
+  /** A round is locked if its predecessor isn't fully picked yet. */
+  const isLocked = (r: RoundId): boolean => {
+    const idx = ROUND_ORDER.indexOf(r)
+    if (idx <= 0) return false
+    return !isRoundComplete(ROUND_ORDER[idx - 1])
+  }
+
   const initialRound = useMemo<RoundId>(() => {
-    for (const r of ROUNDS) {
-      const some = knockoutMatches.some(
-        (m) => m.round === r.id && !resolved.get(m.id)?.winnerTeamId,
-      )
-      if (some) return r.id
+    for (const r of ROUND_ORDER) {
+      if (!isLocked(r) && !isRoundComplete(r)) return r
     }
     return 'F'
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
   const [round, setRound] = useState<RoundId>(initialRound)
 
-  // Fire confetti the moment a champion is first crowned.
+  // Auto-advance to next round when the current one is fully picked.
+  const prevPickCount = useRef(Object.keys(picks.knockoutPicks).length)
+  useEffect(() => {
+    const count = Object.keys(picks.knockoutPicks).length
+    if (count <= prevPickCount.current) { prevPickCount.current = count; return }
+    prevPickCount.current = count
+
+    if (!isRoundComplete(round)) return
+    const idx = ROUND_ORDER.indexOf(round)
+    const next = ROUND_ORDER[idx + 1]
+    if (next) setRound(next)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [picks.knockoutPicks])
+
   const [party, setParty] = useState(false)
   const prevChamp = useRef<string | null>(getChampion(picks))
   useEffect(() => {
@@ -73,16 +97,16 @@ export function Bracket() {
     )
   }
 
+  const decidedCount = (rid: RoundId) =>
+    knockoutMatches.filter((m) => m.round === rid && resolved.get(m.id)?.winnerTeamId).length
+  const totalIn = (rid: RoundId) =>
+    knockoutMatches.filter((m) => m.round === rid).length
+
   const roundMatches = knockoutMatches.filter((m) => m.round === round)
   const isFinal = round === 'F'
   const tpMatch = resolved.get('TP-1')
 
-  const decidedCount = (rid: RoundId) =>
-    knockoutMatches.filter(
-      (m) => m.round === rid && resolved.get(m.id)?.winnerTeamId,
-    ).length
-  const totalIn = (rid: RoundId) =>
-    knockoutMatches.filter((m) => m.round === rid).length
+  const useSingleCol = isFinal
 
   return (
     <Screen title="Knockout" back="/groups" wide>
@@ -90,7 +114,8 @@ export function Bracket() {
 
       <div className={styles.tabs}>
         {ROUNDS.map((r) => {
-          const done = decidedCount(r.id) === totalIn(r.id)
+          const done = isRoundComplete(r.id)
+          const locked = isLocked(r.id)
           return (
             <button
               key={r.id}
@@ -98,12 +123,14 @@ export function Bracket() {
                 styles.tab,
                 r.id === round && styles.tabCurrent,
                 done && styles.tabDone,
+                locked && styles.tabLocked,
               ]
                 .filter(Boolean)
                 .join(' ')}
-              onClick={() => setRound(r.id)}
+              onClick={() => { if (!locked) setRound(r.id) }}
+              aria-disabled={locked}
             >
-              {r.short}
+              {locked ? `🔒 ${r.short}` : r.short}
             </button>
           )
         })}
@@ -115,7 +142,7 @@ export function Bracket() {
           animate={{ scale: 1, opacity: 1 }}
           transition={spring.pop}
         >
-          <div className={`${styles.champBanner}`}>
+          <div className={styles.champBanner}>
             <p className={`wc-eyebrow ${styles.champEyebrow}`}>🏆 World Champions</p>
             <h2 className={styles.champName}>
               <Flag team={champion} size={32} /> {champion.name}
@@ -130,7 +157,7 @@ export function Bracket() {
       <div className={styles.roundHead}>
         <h2 className={styles.roundTitle}>{ROUNDS.find((r) => r.id === round)!.label}</h2>
         <span className={styles.roundSub}>
-          {decidedCount(round)} / {totalIn(round)} picked · tap a team to advance it
+          {decidedCount(round)} / {totalIn(round)} picked
         </span>
       </div>
 
@@ -139,9 +166,7 @@ export function Bracket() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={spring.soft}
-        className={[styles.matches, roundMatches.length === 1 && styles.matchesSingle]
-          .filter(Boolean)
-          .join(' ')}
+        className={[styles.matches, useSingleCol && styles.matchesSingle].filter(Boolean).join(' ')}
       >
         {roundMatches.map((m, i) => {
           const rm = resolved.get(m.id)!

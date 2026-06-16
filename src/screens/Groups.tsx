@@ -9,7 +9,6 @@ import { groups, groupIds, getTeam } from '../data/worldCup2026'
 import {
   THIRDS_REQUIRED,
   allGroupsComplete,
-  groupRank,
   groupsCompletedCount,
   isGroupComplete,
   thirdsComplete,
@@ -39,16 +38,27 @@ export function Groups() {
 
   // ---- Thirds step ----
   if (step === 'thirds') {
-    const selected = picks.qualifiedThirds.length
+    const selected = picks.qualifiedThirdTeamIds?.length ?? 0
     const ready = thirdsComplete(picks)
+
+    // Pool: all non-top-2 teams from every complete group
+    const thirdsPool = groups
+      .filter((g) => isGroupComplete(picks, g.id))
+      .flatMap((g) => {
+        const top2 = new Set(picks.groupRanks[g.id]?.slice(0, 2) ?? [])
+        return g.teamIds
+          .filter((id) => !top2.has(id))
+          .map((id) => ({ teamId: id, groupId: g.id }))
+      })
+
     return (
       <Screen title="Best Thirds" back={() => setStep('groups')}>
         <div className={styles.thirdsHead}>
           <p className="wc-eyebrow">Final qualifying spots</p>
           <h2 className={styles.thirdsTitle}>Pick the 8 best 3rd-place teams</h2>
           <p className={styles.thirdsSub}>
-            12 teams finish 3rd in their group — only the 8 best advance to the
-            Round of 32. You choose which.
+            Teams that didn't finish in the top 2 of their group — pick the 8
+            you think deserve to advance to the Round of 32.
           </p>
           <div className={styles.counter}>
             <Chip tone={ready ? 'green' : 'gold'}>
@@ -58,19 +68,18 @@ export function Groups() {
         </div>
 
         <div className={styles.thirdsList}>
-          {groupIds.map((g) => {
-            const thirdId = groupRank(picks, g, 2)
-            const team = getTeam(thirdId)
-            const picked = picks.qualifiedThirds.includes(g)
+          {thirdsPool.map(({ teamId, groupId }) => {
+            const team = getTeam(teamId)
+            const picked = (picks.qualifiedThirdTeamIds ?? []).includes(teamId)
             const atLimit = selected >= THIRDS_REQUIRED && !picked
             return (
               <TeamSticker
-                key={g}
+                key={teamId}
                 team={team}
                 picked={picked}
                 eliminated={atLimit}
-                meta={`3rd · Grp ${g}`}
-                onClick={() => toggleThird(g)}
+                meta={`Grp ${groupId}`}
+                onClick={() => toggleThird(teamId)}
               />
             )
           })}
@@ -163,18 +172,9 @@ export function Groups() {
             Choose 8 Best Thirds →
           </Button>
         ) : (
-          <Button
-            variant="primary"
-            size="lg"
-            block
-            onClick={() => {
-              // Jump to the next unranked group to keep momentum.
-              const nextOpen = groups.findIndex((g) => !isGroupComplete(picks, g.id))
-              if (nextOpen >= 0) go(nextOpen)
-            }}
-          >
-            {`${12 - groupsDone} groups left`}
-          </Button>
+          <p style={{ textAlign: 'center', color: 'var(--wc-color-ink-soft)', fontSize: 'var(--wc-text-sm)', marginTop: 'var(--wc-space-2)' }}>
+            {12 - groupsDone} group{12 - groupsDone !== 1 ? 's' : ''} left to pick
+          </p>
         )}
       </div>
     </Screen>

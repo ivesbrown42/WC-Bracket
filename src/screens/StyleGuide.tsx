@@ -63,7 +63,7 @@ export function StyleGuide() {
   return (
     <Screen title="Style Guide" back="/">
       {confetti && <Confetti />}
-      <p className="wc-eyebrow">Sticker Cup '26 · design system</p>
+      <p className="wc-eyebrow">World Cup '26 · design system</p>
 
       <Section title="Brand colors">
         <div style={swatchGrid}>
@@ -89,7 +89,7 @@ export function StyleGuide() {
 
       <Section title="Type scale">
         <div style={{ display: 'flex', flexDirection: 'column', gap: space[2] }}>
-          <h1 style={{ fontSize: typography.size['4xl'] }}>Sticker Cup</h1>
+          <h1 style={{ fontSize: typography.size['4xl'] }}>World Cup</h1>
           <h2 style={{ fontSize: typography.size['2xl'] }}>Quarter Finals</h2>
           <p style={{ fontSize: typography.size.base }}>
             Body copy in DM Sans — clean and legible at small sizes for match

@@ -18,11 +18,11 @@ export function groupRank(
 }
 
 /**
- * A group is "set" once its top three are ordered — winner, runner-up and the
- * third-placed team are all needed to seed the 32-team knockout.
+ * A group is "set" once its top two are ordered — the winner and runner-up
+ * are all that's needed to seed the 32-team knockout.
  */
 export function isGroupComplete(picks: BracketPicks, group: GroupId): boolean {
-  return (picks.groupRanks[group]?.length ?? 0) >= 3
+  return (picks.groupRanks[group]?.length ?? 0) >= 2
 }
 
 export function groupsCompletedCount(picks: BracketPicks): number {
@@ -34,17 +34,12 @@ export function allGroupsComplete(picks: BracketPicks): boolean {
 }
 
 export function thirdsComplete(picks: BracketPicks): boolean {
-  return picks.qualifiedThirds.length === THIRDS_REQUIRED
+  return (picks.qualifiedThirdTeamIds?.length ?? 0) === THIRDS_REQUIRED
 }
 
 /** Group stage fully predicted and the 8 best-thirds chosen. */
 export function knockoutReady(picks: BracketPicks): boolean {
   return allGroupsComplete(picks) && thirdsComplete(picks)
-}
-
-/** Qualified thirds in canonical (group-letter) order, mapped to slot indexes. */
-export function orderedQualifiedThirds(picks: BracketPicks): GroupId[] {
-  return groupIds.filter((g) => picks.qualifiedThirds.includes(g))
 }
 
 function resolveSource(
@@ -57,10 +52,8 @@ function resolveSource(
       return groupRank(picks, source.group, 0)
     case 'runner':
       return groupRank(picks, source.group, 1)
-    case 'third': {
-      const group = orderedQualifiedThirds(picks)[source.index]
-      return group ? groupRank(picks, group, 2) : null
-    }
+    case 'third':
+      return picks.qualifiedThirdTeamIds?.[source.index] ?? null
     case 'matchWinner':
       return resolved.get(source.matchId)?.winnerTeamId ?? null
     case 'matchLoser': {
@@ -80,8 +73,6 @@ export function resolveKnockout(
 ): Map<string, ResolvedMatch> {
   const resolved = new Map<string, ResolvedMatch>()
 
-  // knockoutMatches is ordered R32 → … → Final/TP, so earlier results are
-  // always available when a later match references them.
   for (const match of knockoutMatches) {
     const homeTeamId = resolveSource(match.home, resolved, picks)
     const awayTeamId = resolveSource(match.away, resolved, picks)

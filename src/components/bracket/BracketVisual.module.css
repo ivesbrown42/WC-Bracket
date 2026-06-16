@@ -1,0 +1,157 @@
+/* CSS custom property so the SVG stroke colour can reference the design token */
+.card {
+  --vc-line: var(--wc-color-ink-faint);
+
+  background: var(--wc-color-paper-base);
+  border-radius: var(--wc-radius-lg);
+  padding: var(--wc-space-5) var(--wc-space-4);
+  overflow-x: auto;
+}
+
+.title {
+  text-align: center;
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-xs);
+  letter-spacing: var(--wc-tracking-wider);
+  text-transform: uppercase;
+  color: var(--wc-color-ink-faint);
+  margin-bottom: var(--wc-space-5);
+}
+
+/* ── Bracket shell ────────────────────────────────────────────── */
+
+.bracket {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  min-width: max-content;
+  margin: 0 auto;
+}
+
+/* Left and right halves */
+.half {
+  display: flex;
+  align-items: stretch;
+}
+
+/* ── Columns ─────────────────────────────────────────────────── */
+
+.column {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* QF column: two match-pairs separated by a gap */
+.matchPair {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  gap: var(--wc-space-2);
+  padding: var(--wc-space-2) 0;
+}
+
+/* SF column: two slots of equal height, flag centered in each */
+.sfSlot {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Finalist column: one flag vertically centered in full height */
+.finalistSlot {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Connector slot (holds positioned SVG) ───────────────────── */
+
+.connSlot {
+  width: 28px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* ── Flag circles ─────────────────────────────────────────────── */
+
+.flag {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--wc-color-paper-edge);
+  background: var(--wc-color-paper-raised);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.flagEmoji {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.flagTbd {
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-base);
+  color: var(--wc-color-ink-faint);
+}
+
+.flagDim {
+  opacity: 0.3;
+}
+
+.flagChampion {
+  width: 56px;
+  height: 56px;
+  border: 3px solid var(--wc-color-foil-deep);
+  box-shadow: 0 0 0 3px var(--wc-color-foil-light, rgba(255,200,0,0.25));
+}
+
+.flagChampion .flagEmoji {
+  font-size: 30px;
+}
+
+/* ── Center ───────────────────────────────────────────────────── */
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--wc-space-4);
+  min-width: 80px;
+  gap: var(--wc-space-1);
+}
+
+.trophy {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.champFlag {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.champName {
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-sm);
+  font-weight: var(--wc-weight-bold);
+  text-align: center;
+  color: var(--wc-color-foil-deep);
+  max-width: 80px;
+}
+
+.finalLabel {
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-xs);
+  letter-spacing: var(--wc-tracking-wider);
+  text-transform: uppercase;
+  color: var(--wc-color-ink-faint);
+}

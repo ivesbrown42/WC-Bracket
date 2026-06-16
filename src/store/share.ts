@@ -1,4 +1,5 @@
 import type { BracketPicks } from '../data/types'
+import { normalizeTheme } from '../data/theme'
 
 /**
  * Encode/decode a bracket into a compact, URL-safe string so a completed
@@ -29,10 +30,11 @@ export function decodePicks(encoded: string): BracketPicks | null {
       parsed &&
       typeof parsed === 'object' &&
       'groupRanks' in parsed &&
-      'qualifiedThirds' in parsed &&
+      'qualifiedThirdTeamIds' in parsed &&
       'knockoutPicks' in parsed
     ) {
-      return parsed as BracketPicks
+      const picks = parsed as BracketPicks
+      return { ...picks, theme: normalizeTheme(picks.theme) }
     }
     return null
   } catch {

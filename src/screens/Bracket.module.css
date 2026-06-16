@@ -32,17 +32,24 @@
 .tabDone {
   border-color: var(--wc-color-accent-green);
 }
+.tabLocked {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
 
 .matches {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--wc-space-4) var(--wc-space-3);
+  gap: var(--wc-space-3);
   margin-top: var(--wc-space-2);
 }
 .matchesSingle {
-  grid-template-columns: 1fr;
-  max-width: 320px;
-  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: unset;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .roundHead {

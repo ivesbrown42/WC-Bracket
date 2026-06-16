@@ -16,6 +16,8 @@ export interface Team {
   confederation: Confederation
   /** Slot not yet confirmed by the real draw — rendered as a placeholder. */
   placeholder?: boolean
+  /** Flag colors (2–3 hex). Dominant/primary color first. */
+  colors: string[]
 }
 
 export interface Group {
@@ -44,14 +46,16 @@ export interface KnockoutMatch {
 /**
  * The user's predictions.
  * - `groupRanks`: per group, ordered team ids (index 0 = predicted winner).
- * - `qualifiedThirds`: the group letters whose 3rd-placed team the user
- *    advances (exactly 8 of the 12).
+ * - `qualifiedThirdTeamIds`: the 8 team ids (from non-top-2 pool) the user
+ *    advances to the Round of 32 as best-thirds.
  * - `knockoutPicks`: matchId -> 'home' | 'away' winner.
  */
 export interface BracketPicks {
   groupRanks: Partial<Record<GroupId, string[]>>
-  qualifiedThirds: GroupId[]
+  qualifiedThirdTeamIds: string[]
   knockoutPicks: Record<string, 'home' | 'away'>
+  /** The player's team theme (favorite team + border pattern + highlight color). Optional so old saves stay valid. */
+  theme?: import('./theme').TeamTheme
 }
 
 /** A fully-resolved knockout match (after applying picks). */

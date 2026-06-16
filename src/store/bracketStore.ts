@@ -1,32 +1,35 @@
 import { create } from 'zustand'
 import type { BracketPicks, GroupId } from '../data/types'
+import type { TeamTheme } from '../data/theme'
+import { DEFAULT_THEME, normalizeTheme } from '../data/theme'
 import { groups, getTeam } from '../data/worldCup2026'
 import { THIRDS_REQUIRED } from '../data/bracketLogic'
 import { localStorageAdapter } from './storage/localStorageAdapter'
 import type { StorageAdapter } from './storage/StorageAdapter'
 
-// Swap this single line for an account-backed adapter later (see remoteAdapter).
 const adapter: StorageAdapter = localStorageAdapter
 
 export const emptyPicks = (): BracketPicks => ({
   groupRanks: {},
-  qualifiedThirds: [],
+  qualifiedThirdTeamIds: [],
   knockoutPicks: {},
+  theme: DEFAULT_THEME,
 })
 
 interface BracketState {
   picks: BracketPicks
   /**
-   * Tap a team to rank it next in its group (1st → 2nd → 3rd). The 4th is
-   * filled automatically once three are chosen. Tapping a ranked team unranks
-   * it (and anything after it).
+   * Tap a team to rank it next in its group. Tapping a ranked team unranks
+   * it (and anything after it). Group is complete after 2 picks.
    */
   cycleGroupPick: (group: GroupId, teamId: string) => void
   clearGroup: (group: GroupId) => void
-  /** Add/remove a group's third-placed team from the 8 best-thirds (max 8). */
-  toggleThird: (group: GroupId) => void
+  /** Toggle a non-top-2 team in/out of the 8 best-thirds (max 8). */
+  toggleThird: (teamId: string) => void
   /** Choose the winner of a knockout match by side. */
   pickKnockout: (matchId: string, side: 'home' | 'away') => void
+  /** Save the player's team theme. */
+  setTheme: (theme: TeamTheme) => void
   /** Replace all picks (used when importing a shared bracket). */
   loadPicks: (picks: BracketPicks) => void
   resetAll: () => void
@@ -36,8 +39,18 @@ function persist(picks: BracketPicks) {
   adapter.save(picks)
 }
 
+function normalizePicks(raw: BracketPicks | null): BracketPicks {
+  if (!raw) return emptyPicks()
+  return {
+    ...emptyPicks(),
+    ...raw,
+    qualifiedThirdTeamIds: raw.qualifiedThirdTeamIds ?? [],
+    theme: normalizeTheme(raw.theme),
+  }
+}
+
 export const useBracketStore = create<BracketState>((set) => ({
-  picks: adapter.load() ?? emptyPicks(),
+  picks: normalizePicks(adapter.load()),
 
   cycleGroupPick: (group, teamId) =>
     set((state) => {
@@ -45,11 +58,9 @@ export const useBracketStore = create<BracketState>((set) => ({
       let next: string[]
 
       if (current.includes(teamId)) {
-        // Unrank this team and everything ranked after it.
         next = current.slice(0, current.indexOf(teamId))
       } else if (current.length < 4) {
         next = [...current, teamId]
-        // Once three are ranked, auto-place the lone remaining team 4th.
         if (next.length === 3) {
           const remaining = groups
             .find((g) => g.id === group)!
@@ -60,16 +71,23 @@ export const useBracketStore = create<BracketState>((set) => ({
         next = current
       }
 
-      // If a group drops below complete, drop it from qualified-thirds.
-      const qualifiedThirds =
-        next.length < 3
-          ? state.picks.qualifiedThirds.filter((g) => g !== group)
-          : state.picks.qualifiedThirds
+      // Keep qualifiedThirdTeamIds consistent with new top-2
+      const groupTeamIds = new Set(groups.find((g) => g.id === group)!.teamIds)
+      let qualifiedThirdTeamIds = state.picks.qualifiedThirdTeamIds ?? []
+
+      if (next.length < 2) {
+        // Group dropped below complete: remove all its teams from thirds pool
+        qualifiedThirdTeamIds = qualifiedThirdTeamIds.filter((id) => !groupTeamIds.has(id))
+      } else {
+        // Remove any team now in the top-2 from thirds
+        const top2 = new Set(next.slice(0, 2))
+        qualifiedThirdTeamIds = qualifiedThirdTeamIds.filter((id) => !top2.has(id))
+      }
 
       const picks: BracketPicks = {
         ...state.picks,
         groupRanks: { ...state.picks.groupRanks, [group]: next },
-        qualifiedThirds,
+        qualifiedThirdTeamIds,
       }
       persist(picks)
       return { picks }
@@ -79,28 +97,32 @@ export const useBracketStore = create<BracketState>((set) => ({
     set((state) => {
       const groupRanks = { ...state.picks.groupRanks }
       delete groupRanks[group]
+      const groupTeamIds = new Set(groups.find((g) => g.id === group)!.teamIds)
+      const qualifiedThirdTeamIds = (state.picks.qualifiedThirdTeamIds ?? []).filter(
+        (id) => !groupTeamIds.has(id),
+      )
       const picks: BracketPicks = {
         ...state.picks,
         groupRanks,
-        qualifiedThirds: state.picks.qualifiedThirds.filter((g) => g !== group),
+        qualifiedThirdTeamIds,
       }
       persist(picks)
       return { picks }
     }),
 
-  toggleThird: (group) =>
+  toggleThird: (teamId) =>
     set((state) => {
-      const has = state.picks.qualifiedThirds.includes(group)
-      let qualifiedThirds = state.picks.qualifiedThirds
+      const current = state.picks.qualifiedThirdTeamIds ?? []
+      const has = current.includes(teamId)
+      let qualifiedThirdTeamIds: string[]
       if (has) {
-        qualifiedThirds = qualifiedThirds.filter((g) => g !== group)
-      } else if (qualifiedThirds.length < THIRDS_REQUIRED) {
-        // Only groups with a known third can qualify one.
-        if ((state.picks.groupRanks[group]?.length ?? 0) >= 3) {
-          qualifiedThirds = [...qualifiedThirds, group]
-        }
+        qualifiedThirdTeamIds = current.filter((id) => id !== teamId)
+      } else if (current.length < THIRDS_REQUIRED) {
+        qualifiedThirdTeamIds = [...current, teamId]
+      } else {
+        qualifiedThirdTeamIds = current
       }
-      const picks = { ...state.picks, qualifiedThirds }
+      const picks = { ...state.picks, qualifiedThirdTeamIds }
       persist(picks)
       return { picks }
     }),
@@ -111,6 +133,13 @@ export const useBracketStore = create<BracketState>((set) => ({
         ...state.picks,
         knockoutPicks: { ...state.picks.knockoutPicks, [matchId]: side },
       }
+      persist(picks)
+      return { picks }
+    }),
+
+  setTheme: (theme) =>
+    set((state) => {
+      const picks: BracketPicks = { ...state.picks, theme }
       persist(picks)
       return { picks }
     }),
@@ -129,5 +158,4 @@ export const useBracketStore = create<BracketState>((set) => ({
     }),
 }))
 
-// Re-export for convenience in components.
 export { getTeam }
