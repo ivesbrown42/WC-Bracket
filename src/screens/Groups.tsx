@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Screen } from '../components/layout/Screen'
-import { Button, Chip, ProgressBar, TeamSticker } from '../components/ui'
+import { Button, Chip, TeamSticker } from '../components/ui'
 import { GroupCard } from '../components/bracket/GroupCard'
 import { useBracketStore } from '../store/bracketStore'
 import { groups, groupIds, getTeam } from '../data/worldCup2026'
@@ -106,8 +106,6 @@ export function Groups() {
 
   return (
     <Screen title="Group Stage" back="/">
-      <ProgressBar total={12} completed={groupsDone} label="Groups picked" />
-
       <div className={styles.pills}>
         {groups.map((g, i) => (
           <button
