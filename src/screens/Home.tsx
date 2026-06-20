@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { Screen } from '../components/layout/Screen'
 import { Button, Chip, ProgressBar } from '../components/ui'
 import { useBracketStore } from '../store/bracketStore'
+import { useAuthStore } from '../store/authStore'
 import {
   getChampion,
   groupsCompletedCount,
@@ -13,6 +14,8 @@ import styles from './Home.module.css'
 export function Home() {
   const navigate = useNavigate()
   const picks = useBracketStore((s) => s.picks)
+  const user = useAuthStore((s) => s.user)
+  const signOut = useAuthStore((s) => s.signOut)
 
   const groupsDone = groupsCompletedCount(picks)
   const champion = getTeam(getChampion(picks))
@@ -40,7 +43,7 @@ export function Home() {
           picks with friends. 48 teams, one shot at glory.
         </p>
 
-        {started && (
+        {user && started && (
           <div style={{ width: '100%', maxWidth: 320 }}>
             <ProgressBar total={12} completed={groupsDone} label="Groups picked" />
             {champion && (
@@ -52,29 +55,45 @@ export function Home() {
         )}
 
         <div className={styles.actions}>
-          <Button
-            variant="primary"
-            size="lg"
-            block
-            onClick={() => navigate('/groups')}
-          >
-            {started ? 'Continue Bracket' : 'Start Your Bracket'}
-          </Button>
-          <Button variant="secondary" block onClick={() => navigate('/theme')}>
-            🎨 Choose Your Team Colors
-          </Button>
-          {ready && (
-            <Button variant="gold" block onClick={() => navigate('/summary')}>
-              🎉 View Your Bracket
+          {user ? (
+            <>
+              <Button
+                variant="primary"
+                size="lg"
+                block
+                onClick={() => navigate('/groups')}
+              >
+                {started ? 'Continue Bracket' : 'Start Your Bracket'}
+              </Button>
+              {ready && (
+                <Button variant="gold" block onClick={() => navigate('/summary')}>
+                  🎉 View Your Bracket
+                </Button>
+              )}
+              <Button variant="secondary" block onClick={() => navigate('/leaderboard')}>
+                🏆 Leaderboard
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="primary"
+              size="lg"
+              block
+              onClick={() => navigate('/login')}
+            >
+              Start Your Bracket →
             </Button>
           )}
         </div>
       </div>
 
       <div className={styles.footer}>
-        <button className={styles.link} onClick={() => navigate('/style-guide')}>
-          Design system
-        </button>
+        {user ? (
+          <div className={styles.authRow}>
+            <span className={styles.foot}>Signed in as {user.email}</span>
+            <button className={styles.link} onClick={signOut}>Sign out</button>
+          </div>
+        ) : null}
         <span className={styles.foot}>Made for fun · not affiliated with FIFA</span>
       </div>
     </Screen>

@@ -4,9 +4,67 @@ import type {
   ResolvedMatch,
   SlotSource,
 } from './types'
-import { groupIds, knockoutMatches } from './worldCup2026'
+import { groupIds, knockoutMatches, getTeam } from './worldCup2026'
 
 export const THIRDS_REQUIRED = 8
+
+/**
+ * Allowed group-set for each of the 8 R32 third-place slots, indexed by the
+ * `third` slot index (0–7) used in `r32Sources`. Mirrors the official 2026
+ * bracket (FIFA match numbers in comments).
+ */
+export const THIRD_SLOT_GROUPS: GroupId[][] = [
+  ['A', 'B', 'C', 'D', 'F'], // slot 0 · M74
+  ['C', 'D', 'F', 'G', 'H'], // slot 1 · M77
+  ['B', 'E', 'F', 'I', 'J'], // slot 2 · M81
+  ['A', 'E', 'H', 'I', 'J'], // slot 3 · M82
+  ['C', 'E', 'F', 'H', 'I'], // slot 4 · M79
+  ['E', 'H', 'I', 'J', 'K'], // slot 5 · M80
+  ['E', 'F', 'G', 'I', 'J'], // slot 6 · M85
+  ['D', 'E', 'I', 'J', 'L'], // slot 7 · M87
+]
+
+/**
+ * Assign the user's chosen best-thirds to the 8 R32 third slots, respecting
+ * each slot's allowed group-set. Returns slotIndex -> teamId.
+ *
+ * FIFA publishes a fixed 495-row table (one per possible combination of the 8
+ * qualifying groups). We compute a valid bijection via bipartite matching —
+ * one always exists because the slot group-sets are designed to cover every
+ * combination. This is exact for survival scoring (a third either reaches R32
+ * or not, regardless of slot); it can differ from FIFA's table only in how an
+ * equally-valid matching is chosen, which affects the third-matchup bonus.
+ */
+export function assignThirds(thirdTeamIds: string[]): Map<number, string> {
+  const teams = thirdTeamIds.slice(0, THIRDS_REQUIRED)
+  const slotToTeam = new Array<number>(THIRDS_REQUIRED).fill(-1)
+  const groupOf = (id: string): GroupId | undefined => getTeam(id)?.group
+
+  // Kuhn's algorithm — deterministic given a fixed team/slot order.
+  const augment = (t: number, seen: boolean[]): boolean => {
+    const g = groupOf(teams[t])
+    if (!g) return false
+    for (let s = 0; s < THIRD_SLOT_GROUPS.length; s++) {
+      if (seen[s] || !THIRD_SLOT_GROUPS[s].includes(g)) continue
+      seen[s] = true
+      if (slotToTeam[s] === -1 || augment(slotToTeam[s], seen)) {
+        slotToTeam[s] = t
+        return true
+      }
+    }
+    return false
+  }
+
+  for (let t = 0; t < teams.length; t++) {
+    augment(t, new Array<boolean>(THIRD_SLOT_GROUPS.length).fill(false))
+  }
+
+  const result = new Map<number, string>()
+  for (let s = 0; s < slotToTeam.length; s++) {
+    if (slotToTeam[s] !== -1) result.set(s, teams[slotToTeam[s]])
+  }
+  return result
+}
 
 /** Team id at a given group rank (0 = winner, 1 = runner-up, 2 = third). */
 export function groupRank(
@@ -46,6 +104,7 @@ function resolveSource(
   source: SlotSource,
   resolved: Map<string, ResolvedMatch>,
   picks: BracketPicks,
+  thirds: Map<number, string>,
 ): string | null {
   switch (source.kind) {
     case 'winner':
@@ -53,7 +112,7 @@ function resolveSource(
     case 'runner':
       return groupRank(picks, source.group, 1)
     case 'third':
-      return picks.qualifiedThirdTeamIds?.[source.index] ?? null
+      return thirds.get(source.index) ?? null
     case 'matchWinner':
       return resolved.get(source.matchId)?.winnerTeamId ?? null
     case 'matchLoser': {
@@ -72,10 +131,11 @@ export function resolveKnockout(
   picks: BracketPicks,
 ): Map<string, ResolvedMatch> {
   const resolved = new Map<string, ResolvedMatch>()
+  const thirds = assignThirds(picks.qualifiedThirdTeamIds ?? [])
 
   for (const match of knockoutMatches) {
-    const homeTeamId = resolveSource(match.home, resolved, picks)
-    const awayTeamId = resolveSource(match.away, resolved, picks)
+    const homeTeamId = resolveSource(match.home, resolved, picks, thirds)
+    const awayTeamId = resolveSource(match.away, resolved, picks, thirds)
 
     const pick = picks.knockoutPicks[match.id]
     let winnerTeamId: string | null = null

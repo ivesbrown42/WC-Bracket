@@ -58,7 +58,8 @@ export function Groups() {
           <h2 className={styles.thirdsTitle}>Pick the 8 best 3rd-place teams</h2>
           <p className={styles.thirdsSub}>
             Teams that didn't finish in the top 2 of their group — pick the 8
-            you think deserve to advance to the Round of 32.
+            you think advance to the Round of 32 as best-thirds. Only one team
+            per group can qualify.
           </p>
           <div className={styles.counter}>
             <Chip tone={ready ? 'green' : 'gold'}>
@@ -68,21 +69,29 @@ export function Groups() {
         </div>
 
         <div className={styles.thirdsList}>
-          {thirdsPool.map(({ teamId, groupId }) => {
-            const team = getTeam(teamId)
-            const picked = (picks.qualifiedThirdTeamIds ?? []).includes(teamId)
-            const atLimit = selected >= THIRDS_REQUIRED && !picked
-            return (
-              <TeamSticker
-                key={teamId}
-                team={team}
-                picked={picked}
-                eliminated={atLimit}
-                meta={`Grp ${groupId}`}
-                onClick={() => toggleThird(teamId)}
-              />
+          {(() => {
+            const pickedGroups = new Set(
+              (picks.qualifiedThirdTeamIds ?? []).map((id) => getTeam(id)?.group),
             )
-          })}
+            return thirdsPool.map(({ teamId, groupId }) => {
+              const team = getTeam(teamId)
+              const picked = (picks.qualifiedThirdTeamIds ?? []).includes(teamId)
+              // Disabled if the limit is reached, or this team's group already
+              // has a best-third chosen (one per group).
+              const groupTaken = !picked && pickedGroups.has(groupId)
+              const disabled = (selected >= THIRDS_REQUIRED && !picked) || groupTaken
+              return (
+                <TeamSticker
+                  key={teamId}
+                  team={team}
+                  picked={picked}
+                  eliminated={disabled}
+                  meta={`Grp ${groupId}`}
+                  onClick={() => toggleThird(teamId)}
+                />
+              )
+            })
+          })()}
         </div>
 
         <div className={styles.stickyCta}>

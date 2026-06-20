@@ -1,3 +1,4 @@
+export { Avatar } from './Avatar'
 export { StickerCard } from './StickerCard'
 export { Button } from './Button'
 export { Badge } from './Badge'

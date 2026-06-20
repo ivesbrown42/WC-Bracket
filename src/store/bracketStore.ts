@@ -118,7 +118,11 @@ export const useBracketStore = create<BracketState>((set) => ({
       if (has) {
         qualifiedThirdTeamIds = current.filter((id) => id !== teamId)
       } else if (current.length < THIRDS_REQUIRED) {
-        qualifiedThirdTeamIds = [...current, teamId]
+        // Reality: at most one best-third per group (only the 3rd-place team
+        // advances). Block a second pick from a group already represented.
+        const group = getTeam(teamId)?.group
+        const groupTaken = current.some((id) => getTeam(id)?.group === group)
+        qualifiedThirdTeamIds = groupTaken ? current : [...current, teamId]
       } else {
         qualifiedThirdTeamIds = current
       }

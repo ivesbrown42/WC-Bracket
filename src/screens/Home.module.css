@@ -98,10 +98,17 @@
 .link {
   background: none;
   border: none;
+  cursor: pointer;
   font-size: var(--wc-text-xs);
   color: var(--wc-color-ink-soft);
   text-decoration: underline;
   letter-spacing: var(--wc-tracking-wide);
   text-transform: uppercase;
   font-weight: var(--wc-weight-bold);
+}
+
+.authRow {
+  display: flex;
+  align-items: center;
+  gap: var(--wc-space-3);
 }

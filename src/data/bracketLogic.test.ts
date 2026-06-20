@@ -3,11 +3,14 @@ import type { BracketPicks } from './types'
 import { groups, groupIds, knockoutMatches } from './worldCup2026'
 import {
   allGroupsComplete,
+  assignThirds,
   getChampion,
   knockoutReady,
   resolveKnockout,
+  THIRD_SLOT_GROUPS,
   thirdsComplete,
 } from './bracketLogic'
+import { getTeam } from './worldCup2026'
 
 /** Picks where every group is ranked in its given (seeded) order. */
 function fullGroupRanks(): BracketPicks['groupRanks'] {
@@ -59,15 +62,21 @@ describe('knockout resolution', () => {
   it('seeds R32 from group picks (winner / runner / third)', () => {
     const resolved = resolveKnockout(fullPicks())
     const r32_1 = resolved.get('R32-1')!
-    // Template R32-1 = winner(A) vs third[index 0]
-    expect(r32_1.homeTeamId).toBe(groups[0].teamIds[0]) // MEX, winner of A
-    expect(r32_1.awayTeamId).toBe(groups[0].teamIds[2]) // AUT, first qualified third
+    // Official bracket M74: R32-1 = winner(E) vs a best-third from slot 0.
+    const groupE = groups.find((g) => g.id === 'E')!
+    expect(r32_1.homeTeamId).toBe(groupE.teamIds[0]) // winner of Group E
+    // Away is whichever third the slot-0 assignment placed — its group must be
+    // allowed in slot 0's group-set {A,B,C,D,F}.
+    const awayGroup = getTeam(r32_1.awayTeamId!)!.group
+    expect(THIRD_SLOT_GROUPS[0]).toContain(awayGroup)
   })
 
   it('propagates the home side all the way to a champion', () => {
     const picks = fullPicks()
     expect(knockoutReady(picks)).toBe(true)
-    expect(getChampion(picks)).toBe(groups[0].teamIds[0])
+    // R32-1 (M74) home is the Group E winner; always-home carries them to the title.
+    const groupE = groups.find((g) => g.id === 'E')!
+    expect(getChampion(picks)).toBe(groupE.teamIds[0])
   })
 
   it('has no champion until the Final is decided', () => {
@@ -79,5 +88,38 @@ describe('knockout resolution', () => {
   it('builds a full 32-match knockout tree', () => {
     // 16 R32 + 8 R16 + 4 QF + 2 SF + 1 final + 1 third-place
     expect(knockoutMatches).toHaveLength(32)
+  })
+})
+
+describe('best-thirds slot assignment', () => {
+  it('assigns every chosen third to a slot whose group-set allows it', () => {
+    // fullPicks qualifies groups A–H's third-place teams.
+    const thirdIds = fullPicks().qualifiedThirdTeamIds
+    const assignment = assignThirds(thirdIds)
+
+    // All 8 slots filled (a valid bijection always exists).
+    expect(assignment.size).toBe(8)
+
+    // Each assigned team's group must be allowed in its slot.
+    for (const [slot, teamId] of assignment) {
+      const group = getTeam(teamId)!.group
+      expect(THIRD_SLOT_GROUPS[slot]).toContain(group)
+    }
+
+    // No team assigned to two slots.
+    const assignedTeams = [...assignment.values()]
+    expect(new Set(assignedTeams).size).toBe(assignedTeams.length)
+  })
+
+  it('respects forced placements for single-slot groups (K, L)', () => {
+    // K is only allowed in slot 5; L only in slot 7.
+    const ids = ['A', 'B', 'C', 'D', 'E', 'K', 'L', 'F'].map(
+      (g) => groups.find((gr) => gr.id === g)!.teamIds[2],
+    )
+    const assignment = assignThirds(ids)
+    const kTeam = groups.find((g) => g.id === 'K')!.teamIds[2]
+    const lTeam = groups.find((g) => g.id === 'L')!.teamIds[2]
+    expect(assignment.get(5)).toBe(kTeam)
+    expect(assignment.get(7)).toBe(lTeam)
   })
 })

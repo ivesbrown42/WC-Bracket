@@ -1,0 +1,81 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-6);
+  padding-bottom: var(--wc-space-8);
+}
+
+.avatarWrap {
+  display: flex;
+  justify-content: center;
+  padding: var(--wc-space-4) 0 var(--wc-space-2);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-2);
+}
+
+.label {
+  font-family: var(--wc-font-display);
+  font-size: var(--wc-text-lg);
+  color: var(--wc-color-ink);
+}
+
+.hint {
+  font-size: var(--wc-text-sm);
+  color: var(--wc-color-ink-soft);
+  margin: 0;
+}
+
+.input {
+  width: 100%;
+  padding: var(--wc-space-3) var(--wc-space-4);
+  border: 2px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-md);
+  font-size: var(--wc-text-base);
+  font-family: var(--wc-font-body);
+  background: var(--wc-color-surface);
+  color: var(--wc-color-ink);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--wc-color-accent-red);
+}
+
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: var(--wc-space-2);
+}
+
+.teamBtn {
+  aspect-ratio: 1;
+  border: 2px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-md);
+  background: var(--wc-color-surface);
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.teamBtn:hover {
+  transform: scale(1.12);
+}
+
+.teamBtnActive {
+  transform: scale(1.18);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
+  color: white;
+}
+
+.actions {
+  padding-top: var(--wc-space-2);
+}
