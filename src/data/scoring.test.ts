@@ -3,6 +3,7 @@ import type { BracketPicks } from './types'
 import { groups, groupIds, knockoutMatches } from './worldCup2026'
 import {
   scoreBracket,
+  reviewBracket,
   resultsFromPicks,
   type TournamentResults,
 } from './scoring'
@@ -96,5 +97,33 @@ describe('scoreBracket', () => {
       matchups: { R32: [tampered] },
     }
     expect(scoreBracket(picks, results).bonusPoints).toBe(0)
+  })
+})
+
+describe('reviewBracket', () => {
+  it('marks group picks pending when unfinished, correct/wrong when final', () => {
+    const picks = fullPicks()
+    const a = groups.find((g) => g.id === 'A')!
+    const results: TournamentResults = {
+      ...EMPTY_RESULTS,
+      // Group A final: 1st correct, runner-up is actually the 3rd-place team.
+      groupAdvancers: { A: [a.teamIds[0], a.teamIds[2]] },
+    }
+    const review = reviewBracket(picks, results)
+
+    const groupA = review.groups.find((g) => g.group === 'A')!
+    expect(groupA.items[0].status).toBe('correct') // predicted winner advanced
+    expect(groupA.items[1].status).toBe('wrong') // predicted runner-up did not
+
+    // Group B hasn't finished → both picks pending.
+    const groupB = review.groups.find((g) => g.group === 'B')!
+    expect(groupB.items.every((i) => i.status === 'pending')).toBe(true)
+  })
+
+  it('reports total points alongside the breakdown', () => {
+    const picks = fullPicks()
+    const review = reviewBracket(picks, resultsFromPicks(picks))
+    expect(review.total).toBe(94)
+    expect(review.stages.find((s) => s.stage === 'CHAMP')!.items).toHaveLength(1)
   })
 })

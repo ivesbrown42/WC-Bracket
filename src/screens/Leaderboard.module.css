@@ -18,14 +18,42 @@
   gap: var(--wc-space-2);
 }
 
+.search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--wc-space-2) var(--wc-space-3);
+  margin-bottom: var(--wc-space-3);
+  border: 1.5px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-md);
+  font-size: var(--wc-text-sm);
+  font-family: var(--wc-font-body);
+  background: var(--wc-color-surface);
+  color: var(--wc-color-ink);
+  outline: none;
+}
+.search:focus {
+  border-color: var(--wc-color-accent-red);
+}
+
 .card {
   display: flex;
   align-items: center;
   gap: var(--wc-space-3);
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
   padding: var(--wc-space-3) var(--wc-space-4);
   background: var(--wc-color-surface);
   border: 1.5px solid var(--wc-color-border);
   border-radius: var(--wc-radius-lg);
+  transition: transform 0.1s, border-color 0.1s;
+}
+.card:hover {
+  border-color: var(--wc-color-accent-red);
+}
+.card:active {
+  transform: scale(0.99);
 }
 
 .cardMe {

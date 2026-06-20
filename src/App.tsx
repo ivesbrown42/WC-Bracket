@@ -12,6 +12,8 @@ import { TeamThemeStudio } from './screens/TeamThemeStudio'
 import { Login } from './screens/Login'
 import { Leaderboard } from './screens/Leaderboard'
 import { ProfileSetup } from './screens/ProfileSetup'
+import { ProfileView } from './screens/ProfileView'
+import { SetPassword } from './screens/SetPassword'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user)
@@ -41,7 +43,9 @@ export default function App() {
         <Route path="/summary"       element={<RequireAuth><Summary /></RequireAuth>} />
         <Route path="/theme"         element={<RequireAuth><TeamThemeStudio /></RequireAuth>} />
         <Route path="/profile-setup" element={<RequireAuth><ProfileSetup /></RequireAuth>} />
+        <Route path="/set-password"  element={<RequireAuth><SetPassword /></RequireAuth>} />
         <Route path="/leaderboard"   element={<RequireAuth><Leaderboard /></RequireAuth>} />
+        <Route path="/profile/:userId" element={<RequireAuth><ProfileView /></RequireAuth>} />
         <Route path="*" element={<Home />} />
       </Routes>
     </>

@@ -14,18 +14,31 @@ export function ProfileSetup() {
   const user = useAuthStore((s) => s.user)
   const profile = useAuthStore((s) => s.profile)
   const refreshProfile = useAuthStore((s) => s.refreshProfile)
+  const setPassword = useAuthStore((s) => s.setPassword)
 
   const [name, setName] = useState(profile?.display_name ?? '')
   const [teamId, setTeamId] = useState<string | null>(null)
+  const [pw, setPw] = useState('')
+  const [confirm, setConfirm] = useState('')
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const canSave = name.trim().length > 0 && teamId !== null
+  const canSave =
+    name.trim().length > 0 && teamId !== null && pw.length >= 6 && pw === confirm
 
   const handleSave = async () => {
     if (!user || !canSave) return
     setSaving(true)
+    setError(null)
     await saveProfile(user.id, name.trim(), teamId!)
+    const { error: pwErr } = await setPassword(pw)
     await refreshProfile()
+    setSaving(false)
+    if (pwErr) {
+      // Profile saved, but password failed — let them retry / set it later.
+      setError(`Profile saved, but password could not be set: ${pwErr}`)
+      return
+    }
     navigate('/')
   }
 
@@ -79,6 +92,29 @@ export function ProfileSetup() {
             ))}
           </div>
         </div>
+
+        {/* Password */}
+        <div className={styles.field}>
+          <label className={styles.label}>Create a password</label>
+          <p className={styles.hint}>So you can sign in instantly next time — no email needed.</p>
+          <input
+            type="password"
+            className={styles.input}
+            placeholder="Password (min 6 characters)"
+            value={pw}
+            onChange={(e) => setPw(e.target.value)}
+          />
+          <input
+            type="password"
+            className={styles.input}
+            placeholder="Confirm password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            style={{ marginTop: 'var(--wc-space-2)' }}
+          />
+        </div>
+
+        {error && <p className={styles.error}>{error}</p>}
 
         <div className={styles.actions}>
           <Button

@@ -45,6 +45,24 @@ export interface BracketRow {
   bracket: BracketPicks
 }
 
+/** One user's bracket + profile, for their profile page. */
+export async function getProfile(userId: string): Promise<BracketRow | null> {
+  const { data, error } = await supabase
+    .from('picks')
+    .select('user_id, bracket, profiles(display_name, favorite_team_id)')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error || !data) return null
+  const row = data as any
+  return {
+    userId: row.user_id,
+    displayName: row.profiles?.display_name ?? 'Anonymous',
+    favoriteTeamId: row.profiles?.favorite_team_id ?? null,
+    bracket: row.bracket as BracketPicks,
+  }
+}
+
 /** Every submitted bracket + its owner's profile — scored client-side. */
 export async function getAllBrackets(): Promise<BracketRow[]> {
   const { data, error } = await supabase

@@ -76,6 +76,12 @@
   color: white;
 }
 
+.error {
+  font-size: var(--wc-text-sm);
+  color: #c41e3a;
+  margin: 0;
+}
+
 .actions {
   padding-top: var(--wc-space-2);
 }

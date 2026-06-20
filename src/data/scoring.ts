@@ -148,6 +148,73 @@ export function scoreBracket(
   }
 }
 
+// ---------------------------------------------------------------------------
+// Pick-by-pick review (for profile detail views)
+// ---------------------------------------------------------------------------
+
+export type PickStatus = 'correct' | 'wrong' | 'pending'
+export interface ReviewItem {
+  teamId: string
+  status: PickStatus
+}
+export interface BracketReview {
+  total: number
+  /** Predicted top-2 advancers per group. */
+  groups: { group: GroupId; items: ReviewItem[] }[]
+  /** Predicted best-thirds. */
+  thirds: ReviewItem[]
+  /** Predicted teams reaching each knockout stage. */
+  stages: { stage: KnockoutStage; items: ReviewItem[] }[]
+}
+
+const statusVs = (known: boolean, actual: Set<string>, teamId: string): PickStatus =>
+  !known ? 'pending' : actual.has(teamId) ? 'correct' : 'wrong'
+
+/** A full pick-by-pick breakdown of how a bracket is doing against results. */
+export function reviewBracket(
+  picks: BracketPicks,
+  results: TournamentResults,
+): BracketReview {
+  const resolved = resolveKnockout(picks)
+  const list = [...resolved.values()]
+
+  const groups: BracketReview['groups'] = []
+  for (const g of groupIds) {
+    const predicted = (picks.groupRanks[g] ?? []).slice(0, 2)
+    if (predicted.length === 0) continue
+    const actual = results.groupAdvancers[g]
+    const set = new Set(actual ?? [])
+    groups.push({
+      group: g,
+      items: predicted.map((teamId) => ({ teamId, status: statusVs(!!actual, set, teamId) })),
+    })
+  }
+
+  const thirdsKnown = results.bestThirds.length > 0
+  const thirdsSet = new Set(results.bestThirds)
+  const thirds = (picks.qualifiedThirdTeamIds ?? []).map((teamId) => ({
+    teamId,
+    status: statusVs(thirdsKnown, thirdsSet, teamId),
+  }))
+
+  const stages: BracketReview['stages'] = []
+  for (const stage of Object.keys(STAGE_SOURCE_ROUND) as KnockoutStage[]) {
+    const round = STAGE_SOURCE_ROUND[stage]
+    const predicted = list
+      .filter((m) => m.round === round && m.winnerTeamId)
+      .map((m) => m.winnerTeamId!)
+    if (predicted.length === 0) continue
+    const actual = results.reached[stage]
+    const set = new Set(actual ?? [])
+    stages.push({
+      stage,
+      items: predicted.map((teamId) => ({ teamId, status: statusVs(!!actual, set, teamId) })),
+    })
+  }
+
+  return { total: scoreBracket(picks, results).total, groups, thirds, stages }
+}
+
 /**
  * Derive a TournamentResults from a fully-decided bracket. Reality, once
  * complete, IS a filled bracket — so this is how a "truth" bracket becomes

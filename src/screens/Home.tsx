@@ -75,14 +75,19 @@ export function Home() {
               </Button>
             </>
           ) : (
-            <Button
-              variant="primary"
-              size="lg"
-              block
-              onClick={() => navigate('/login')}
-            >
-              Start Your Bracket →
-            </Button>
+            <>
+              <Button
+                variant="primary"
+                size="lg"
+                block
+                onClick={() => navigate('/login')}
+              >
+                Start Your Bracket →
+              </Button>
+              <Button variant="secondary" block onClick={() => navigate('/login')}>
+                Sign Back In
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -91,6 +96,7 @@ export function Home() {
         {user ? (
           <div className={styles.authRow}>
             <span className={styles.foot}>Signed in as {user.email}</span>
+            <button className={styles.link} onClick={() => navigate('/set-password')}>Password</button>
             <button className={styles.link} onClick={signOut}>Sign out</button>
           </div>
         ) : null}

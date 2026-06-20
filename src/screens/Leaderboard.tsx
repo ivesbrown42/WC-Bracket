@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Screen } from '../components/layout/Screen'
 import { Avatar, Chip } from '../components/ui'
 import { useAuthStore } from '../store/authStore'
@@ -21,9 +22,11 @@ interface Entry {
 
 export function Leaderboard() {
   const user = useAuthStore((s) => s.user)
+  const navigate = useNavigate()
   const [entries, setEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
   const [live, setLive] = useState(false)
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     ;(async () => {
@@ -72,39 +75,52 @@ export function Leaderboard() {
       )}
 
       {!loading && entries.length > 0 && (
-        <div className={styles.feed}>
-          {entries.map((entry, i) => {
-            const winner = entry.winnerPick ? getTeam(entry.winnerPick) : undefined
-            const isMe = entry.userId === user?.id
-            return (
-              <div
-                key={entry.userId}
-                className={[styles.card, isMe ? styles.cardMe : ''].join(' ')}
-              >
-                <span className={styles.medal}>{MEDALS[i] ?? `#${i + 1}`}</span>
-                <Avatar teamId={entry.favoriteTeamId} size={44} />
-                <div className={styles.info}>
-                  <span className={styles.name}>
-                    {entry.displayName}
-                    {isMe && <span className={styles.you}> · you</span>}
-                  </span>
-                  {winner ? (
-                    <span className={styles.pick}>
-                      picks {winner.flag} {winner.name} to win
-                    </span>
-                  ) : (
-                    <span className={styles.pick} style={{ opacity: 0.35 }}>
-                      bracket not complete
-                    </span>
-                  )}
-                </div>
-                <Chip tone={entry.score > 0 ? 'green' : 'default'}>
-                  {entry.score} pts
-                </Chip>
-              </div>
-            )
-          })}
-        </div>
+        <>
+          <input
+            type="text"
+            className={styles.search}
+            placeholder="Search players…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <div className={styles.feed}>
+            {entries
+              .filter((e) => e.displayName.toLowerCase().includes(query.trim().toLowerCase()))
+              .map((entry) => {
+                const winner = entry.winnerPick ? getTeam(entry.winnerPick) : undefined
+                const isMe = entry.userId === user?.id
+                const rank = entries.indexOf(entry)
+                return (
+                  <button
+                    key={entry.userId}
+                    className={[styles.card, isMe ? styles.cardMe : ''].join(' ')}
+                    onClick={() => navigate(`/profile/${entry.userId}`)}
+                  >
+                    <span className={styles.medal}>{MEDALS[rank] ?? `#${rank + 1}`}</span>
+                    <Avatar teamId={entry.favoriteTeamId} size={44} />
+                    <div className={styles.info}>
+                      <span className={styles.name}>
+                        {entry.displayName}
+                        {isMe && <span className={styles.you}> · you</span>}
+                      </span>
+                      {winner ? (
+                        <span className={styles.pick}>
+                          picks {winner.flag} {winner.name} to win
+                        </span>
+                      ) : (
+                        <span className={styles.pick} style={{ opacity: 0.35 }}>
+                          bracket not complete
+                        </span>
+                      )}
+                    </div>
+                    <Chip tone={entry.score > 0 ? 'green' : 'default'}>
+                      {entry.score} pts
+                    </Chip>
+                  </button>
+                )
+              })}
+          </div>
+        </>
       )}
     </Screen>
   )
