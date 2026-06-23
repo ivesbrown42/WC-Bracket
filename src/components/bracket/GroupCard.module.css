@@ -12,6 +12,7 @@
 }
 .groupLabel {
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-2xl);
   text-transform: uppercase;
   line-height: 1;
@@ -40,6 +41,7 @@
   height: 26px;
   border-radius: var(--wc-radius-pill);
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-sm);
   border: 2px solid var(--wc-color-paper-raised);
   color: var(--wc-color-ink-inverse);

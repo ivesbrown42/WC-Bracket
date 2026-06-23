@@ -100,6 +100,43 @@ export function knockoutReady(picks: BracketPicks): boolean {
   return allGroupsComplete(picks) && thirdsComplete(picks)
 }
 
+/**
+ * Map each match to the matches that consume its winner/loser (direct
+ * dependents). Built once from the static knockout tree.
+ */
+const directDependents: Map<string, string[]> = (() => {
+  const map = new Map<string, string[]>()
+  for (const m of knockoutMatches) {
+    for (const src of [m.home, m.away]) {
+      if (src.kind === 'matchWinner' || src.kind === 'matchLoser') {
+        const arr = map.get(src.matchId) ?? []
+        arr.push(m.id)
+        map.set(src.matchId, arr)
+      }
+    }
+  }
+  return map
+})()
+
+/**
+ * All matches downstream of `matchId` (transitively). When an earlier pick
+ * changes the match winner, these later matches now have a different
+ * participant and must be re-decided — so the store clears their picks.
+ */
+export function downstreamMatchIds(matchId: string): string[] {
+  const out: string[] = []
+  const seen = new Set<string>()
+  const stack = [...(directDependents.get(matchId) ?? [])]
+  while (stack.length) {
+    const id = stack.pop()!
+    if (seen.has(id)) continue
+    seen.add(id)
+    out.push(id)
+    for (const d of directDependents.get(id) ?? []) stack.push(d)
+  }
+  return out
+}
+
 function resolveSource(
   source: SlotSource,
   resolved: Map<string, ResolvedMatch>,

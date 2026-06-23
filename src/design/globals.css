@@ -37,7 +37,7 @@ h2,
 h3,
 h4 {
   font-family: var(--wc-font-display);
-  font-weight: var(--wc-weight-regular);
+  font-weight: var(--wc-weight-bold);
   line-height: var(--wc-leading-tight);
   letter-spacing: var(--wc-tracking-tight);
   text-transform: uppercase;

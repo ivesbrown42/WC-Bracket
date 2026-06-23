@@ -23,6 +23,7 @@
 
 .name {
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-xl);
   color: var(--wc-color-ink);
   margin: 0;
@@ -49,6 +50,7 @@
 }
 .scoreNum {
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-2xl);
   line-height: 1;
 }

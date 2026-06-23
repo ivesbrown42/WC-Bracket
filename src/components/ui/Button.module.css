@@ -7,59 +7,59 @@
   font-weight: var(--wc-weight-bold);
   letter-spacing: var(--wc-tracking-wide);
   text-transform: uppercase;
-  border: 2px solid var(--wc-color-ink-base);
+  border: 2px solid transparent;
   border-radius: var(--wc-radius-pill);
   color: var(--wc-color-ink-base);
-  background: var(--wc-color-paper-raised);
-  box-shadow: 0 3px 0 var(--wc-color-ink-base);
+  background: var(--wc-color-paper-sunk);
   transition:
-    transform var(--wc-dur-fast) var(--wc-ease-bounce),
-    box-shadow var(--wc-dur-fast) var(--wc-ease-standard),
-    background-color var(--wc-dur-fast) var(--wc-ease-standard);
+    filter var(--wc-dur-fast) var(--wc-ease-standard),
+    transform var(--wc-dur-fast) var(--wc-ease-standard);
   user-select: none;
   white-space: nowrap;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 0 var(--wc-color-ink-base);
+  filter: brightness(0.96);
 }
 .btn:active {
-  transform: translateY(3px);
-  box-shadow: 0 0 0 var(--wc-color-ink-base);
+  transform: scale(0.98);
+  filter: brightness(0.92);
 }
 .btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+  filter: none;
   transform: none;
-  box-shadow: 0 3px 0 var(--wc-color-ink-base);
 }
 
-/* Variants */
+/* Variants — tonal: a soft fill, a darker same-hue text colour, and a stroke
+   that matches the text (clean outlined-tonal look). */
 .primary {
-  background: var(--wc-color-accent-red);
-  color: var(--wc-color-ink-inverse);
+  background: color-mix(in srgb, var(--wc-color-accent-red) 22%, var(--wc-color-paper-raised));
+  color: color-mix(in srgb, var(--wc-color-accent-red) 72%, var(--wc-color-ink-base));
+  border-color: currentColor;
 }
 .gold {
-  background: var(--wc-color-foil-gold);
-  color: var(--wc-color-ink-base);
+  background: color-mix(in srgb, var(--wc-color-foil-gold) 44%, var(--wc-color-paper-raised));
+  color: var(--wc-color-foil-deep);
+  border-color: currentColor;
 }
 .secondary {
   background: var(--wc-color-paper-raised);
+  color: var(--wc-color-ink-base);
+  border-color: var(--wc-color-paper-edge);
 }
 .ghost {
   background: transparent;
-  border-color: transparent;
-  box-shadow: none;
+  color: var(--wc-color-ink-soft);
 }
 .ghost:hover {
   background: rgba(43, 34, 24, 0.06);
-  box-shadow: none;
-  transform: none;
+  filter: none;
 }
 .ghost:active {
-  box-shadow: none;
-  transform: none;
+  filter: none;
+  transform: scale(0.98);
 }
 
 /* Sizes */

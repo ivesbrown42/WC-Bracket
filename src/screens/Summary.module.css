@@ -55,6 +55,7 @@
 }
 .podRank {
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-lg);
 }
 .podFlag {
@@ -80,6 +81,7 @@
 }
 .pathRound {
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-xs);
   width: 44px;
   color: var(--wc-color-ink-faint);

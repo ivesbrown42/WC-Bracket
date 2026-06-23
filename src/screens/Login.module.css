@@ -16,6 +16,7 @@
 
 .heading {
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-2xl);
   color: var(--wc-color-ink);
   margin: 0;

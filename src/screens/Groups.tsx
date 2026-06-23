@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Screen } from '../components/layout/Screen'
 import { Button, Chip, TeamSticker } from '../components/ui'
 import { GroupCard } from '../components/bracket/GroupCard'
+import { StageTabs, type StageTabItem, type StageTabState } from '../components/bracket/StageTabs'
 import { useBracketStore } from '../store/bracketStore'
 import { groups, groupIds, getTeam } from '../data/worldCup2026'
 import {
@@ -11,8 +12,17 @@ import {
   allGroupsComplete,
   groupsCompletedCount,
   isGroupComplete,
+  knockoutReady,
   thirdsComplete,
 } from '../data/bracketLogic'
+
+const KNOCKOUT_STAGES = [
+  { id: 'R32', label: 'R32' },
+  { id: 'R16', label: 'R16' },
+  { id: 'QF', label: 'QF' },
+  { id: 'SF', label: 'SF' },
+  { id: 'F', label: 'Final' },
+]
 import { spring } from '../design/tokens'
 import styles from './Groups.module.css'
 
@@ -24,14 +34,26 @@ export function Groups() {
   const submitted = useBracketStore((s) => s.submitted)
 
   const [step, setStep] = useState<'groups' | 'thirds'>('groups')
-  const [index, setIndex] = useState(0)
+  // Start on the first incomplete group (or A if all are done).
+  const [index, setIndex] = useState(() => {
+    const f = groups.findIndex((g) => !isGroupComplete(picks, g.id))
+    return f === -1 ? 0 : f
+  })
   const [dir, setDir] = useState(1)
 
   const groupsDone = groupsCompletedCount(picks)
   const allDone = allGroupsComplete(picks)
 
+  // Navigation gating: once every group is done you can roam freely; on the
+  // first pass you can only revisit completed groups or open the next one.
+  const freeRoam = allDone
+  const frontier = groups.findIndex((g) => !isGroupComplete(picks, g.id))
+  const canAccessGroup = (i: number) =>
+    freeRoam || isGroupComplete(picks, groups[i].id) || i === frontier
+
   const go = (next: number) => {
     if (next < 0 || next > groupIds.length - 1) return
+    if (!canAccessGroup(next)) return
     setDir(next > index ? 1 : -1)
     setIndex(next)
   }
@@ -120,24 +142,30 @@ export function Groups() {
           <Chip tone="green">🔒 Bracket submitted — picks are locked</Chip>
         </div>
       )}
-      <div className={styles.pills}>
-        {groups.map((g, i) => (
-          <button
-            key={g.id}
-            className={[
-              styles.pill,
-              i === index && styles.pillCurrent,
-              isGroupComplete(picks, g.id) && styles.pillDone,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            onClick={() => go(i)}
-            aria-label={`Group ${g.id}`}
-          >
-            {g.id}
-          </button>
-        ))}
-      </div>
+      {/* Level 1 — stage nav (Groups · R32 · R16 · QF · SF · Final) */}
+      <StageTabs
+        items={[
+          { key: 'groups', label: 'Groups', state: 'current' },
+          ...KNOCKOUT_STAGES.map<StageTabItem>((s) => ({
+            key: s.id,
+            label: s.label,
+            state: knockoutReady(picks) ? 'default' : 'locked',
+            onClick: () => navigate('/bracket'),
+          })),
+        ]}
+      />
+
+      {/* Level 2 — group nav (A · B · C …) */}
+      <StageTabs
+        variant="text"
+        items={groups.map<StageTabItem>((g, i) => {
+          const complete = isGroupComplete(picks, g.id)
+          const accessible = canAccessGroup(i)
+          const state: StageTabState =
+            i === index ? 'current' : !accessible ? 'locked' : complete ? 'done' : 'default'
+          return { key: g.id, label: g.id, state, onClick: () => go(i) }
+        })}
+      />
 
       <div className={styles.stage}>
         <AnimatePresence mode="wait" custom={dir}>
@@ -171,7 +199,7 @@ export function Groups() {
         <Button
           variant="secondary"
           onClick={() => go(index + 1)}
-          disabled={index === groupIds.length - 1}
+          disabled={index === groupIds.length - 1 || !canAccessGroup(index + 1)}
         >
           Next ›
         </Button>

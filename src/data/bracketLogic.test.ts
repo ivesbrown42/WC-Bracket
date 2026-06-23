@@ -4,6 +4,7 @@ import { groups, groupIds, knockoutMatches } from './worldCup2026'
 import {
   allGroupsComplete,
   assignThirds,
+  downstreamMatchIds,
   getChampion,
   knockoutReady,
   resolveKnockout,
@@ -88,6 +89,20 @@ describe('knockout resolution', () => {
   it('builds a full 32-match knockout tree', () => {
     // 16 R32 + 8 R16 + 4 QF + 2 SF + 1 final + 1 third-place
     expect(knockoutMatches).toHaveLength(32)
+  })
+})
+
+describe('downstream invalidation', () => {
+  it('lists every later match that depends on a given match', () => {
+    // R32-1 feeds R16-1 → QF-1 → SF-1 → Final, and SF-1's loser feeds 3rd-place.
+    const down = downstreamMatchIds('R32-1')
+    expect(down).toEqual(expect.arrayContaining(['R16-1', 'QF-1', 'SF-1', 'F-1', 'TP-1']))
+    // It must not include unrelated branches (e.g. the other semi-final).
+    expect(down).not.toContain('SF-2')
+  })
+
+  it('the Final has no downstream matches', () => {
+    expect(downstreamMatchIds('F-1')).toEqual([])
   })
 })
 

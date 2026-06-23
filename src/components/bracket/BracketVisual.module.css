@@ -11,6 +11,7 @@
 .title {
   text-align: center;
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-xs);
   letter-spacing: var(--wc-tracking-wider);
   text-transform: uppercase;
@@ -98,6 +99,7 @@
 
 .flagTbd {
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-base);
   color: var(--wc-color-ink-faint);
 }
@@ -141,6 +143,7 @@
 
 .champName {
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-sm);
   font-weight: var(--wc-weight-bold);
   text-align: center;
@@ -150,6 +153,7 @@
 
 .finalLabel {
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-xs);
   letter-spacing: var(--wc-tracking-wider);
   text-transform: uppercase;

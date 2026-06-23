@@ -48,6 +48,7 @@
 
 .title {
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-xl);
   text-transform: uppercase;
   letter-spacing: var(--wc-tracking-tight);

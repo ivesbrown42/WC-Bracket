@@ -6,6 +6,7 @@
   height: 1.75rem;
   padding: 0 var(--wc-space-2);
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-base);
   line-height: 1;
   color: var(--wc-color-ink-inverse);

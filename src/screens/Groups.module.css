@@ -16,6 +16,7 @@
   border: 2px solid var(--wc-color-paper-edge);
   background: var(--wc-color-paper-raised);
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-base);
   color: var(--wc-color-ink-soft);
   position: relative;
@@ -34,6 +35,10 @@
 .stage {
   margin-top: var(--wc-space-2);
   overflow: hidden;
+  /* Round the clip + pad so the card's embossed shadow isn't squared off at
+     the corners (overflow:hidden is needed for the slide animation). */
+  border-radius: var(--wc-radius-lg);
+  padding: 4px 8px 12px;
 }
 
 .nav {
@@ -46,6 +51,7 @@
   flex: 1;
   text-align: center;
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-lg);
   color: var(--wc-color-ink-soft);
 }

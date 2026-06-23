@@ -1,12 +1,12 @@
 /**
  * Typography tokens.
- * Display: "Anton" — tall condensed poster face for sticker-album headers.
- * Body: "DM Sans" — clean, friendly, highly legible at small sizes.
+ * Display + Body both use "DM Sans" — headings are simply the bold weight,
+ * for a cleaner look than the old heavy condensed poster face.
  * Fonts are loaded in index.html.
  */
 export const typography = {
   family: {
-    display: "'Anton', 'Arial Narrow', sans-serif",
+    display: "'DM Sans', system-ui, -apple-system, sans-serif",
     body: "'DM Sans', system-ui, -apple-system, sans-serif",
   },
 

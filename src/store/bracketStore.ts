@@ -3,7 +3,7 @@ import type { BracketPicks, GroupId } from '../data/types'
 import type { TeamTheme } from '../data/theme'
 import { DEFAULT_THEME, normalizeTheme } from '../data/theme'
 import { groups, getTeam } from '../data/worldCup2026'
-import { THIRDS_REQUIRED } from '../data/bracketLogic'
+import { THIRDS_REQUIRED, resolveKnockout, downstreamMatchIds } from '../data/bracketLogic'
 import { localStorageAdapter } from './storage/localStorageAdapter'
 import type { StorageAdapter } from './storage/StorageAdapter'
 
@@ -182,10 +182,20 @@ export const useBracketStore = create<BracketState>((set) => ({
   pickKnockout: (matchId, side) =>
     set((state) => {
       if (state.submitted) return {} // locked
-      const picks: BracketPicks = {
-        ...state.picks,
-        knockoutPicks: { ...state.picks.knockoutPicks, [matchId]: side },
+
+      const before = resolveKnockout(state.picks).get(matchId)?.winnerTeamId ?? null
+      const knockoutPicks = { ...state.picks.knockoutPicks, [matchId]: side }
+      const after =
+        resolveKnockout({ ...state.picks, knockoutPicks }).get(matchId)?.winnerTeamId ??
+        null
+
+      // If this changed who advances, every downstream match in this branch now
+      // has a different participant — clear those picks so they must be redone.
+      if (before !== after) {
+        for (const id of downstreamMatchIds(matchId)) delete knockoutPicks[id]
       }
+
+      const picks: BracketPicks = { ...state.picks, knockoutPicks }
       persist(picks)
       return { picks }
     }),

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Screen } from '../components/layout/Screen'
 import { Button, Chip, Confetti, Flag, ConfirmModal } from '../components/ui'
 import { MatchCard } from '../components/bracket/MatchCard'
+import { StageTabs, type StageTabItem } from '../components/bracket/StageTabs'
 import { useBracketStore } from '../store/bracketStore'
 import { useAuthStore } from '../store/authStore'
 import { savePicks, lockPicks } from '../lib/db'
@@ -133,29 +134,23 @@ export function Bracket() {
     <Screen title="Knockout" back="/groups" wide>
       {party && <Confetti />}
 
-      <div className={styles.tabs}>
-        {ROUNDS.map((r) => {
-          const done = isRoundComplete(r.id)
-          const locked = isLocked(r.id)
-          return (
-            <button
-              key={r.id}
-              className={[
-                styles.tab,
-                r.id === round && styles.tabCurrent,
-                done && styles.tabDone,
-                locked && styles.tabLocked,
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              onClick={() => { if (!locked) setRound(r.id) }}
-              aria-disabled={locked}
-            >
-              {locked ? `🔒 ${r.short}` : r.short}
-            </button>
-          )
-        })}
-      </div>
+      <StageTabs
+        items={[
+          { key: 'groups', label: 'Groups', state: 'done', onClick: () => navigate('/groups') },
+          ...ROUNDS.map<StageTabItem>((r) => ({
+            key: r.id,
+            label: r.short,
+            state: r.id === round
+              ? 'current'
+              : isLocked(r.id)
+                ? 'locked'
+                : isRoundComplete(r.id)
+                  ? 'done'
+                  : 'default',
+            onClick: () => setRound(r.id),
+          })),
+        ]}
+      />
 
       {isFinal && champion && (
         <motion.div

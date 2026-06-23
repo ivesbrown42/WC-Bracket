@@ -24,6 +24,7 @@
 
 .teamName {
   font-family: var(--wc-font-display);
+  font-weight: var(--wc-weight-bold);
   font-size: var(--wc-text-lg);
   letter-spacing: var(--wc-tracking-tight);
   text-transform: uppercase;
