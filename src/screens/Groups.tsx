@@ -20,8 +20,8 @@ export function Groups() {
   const navigate = useNavigate()
   const picks = useBracketStore((s) => s.picks)
   const cycleGroupPick = useBracketStore((s) => s.cycleGroupPick)
-  const clearGroup = useBracketStore((s) => s.clearGroup)
   const toggleThird = useBracketStore((s) => s.toggleThird)
+  const submitted = useBracketStore((s) => s.submitted)
 
   const [step, setStep] = useState<'groups' | 'thirds'>('groups')
   const [index, setIndex] = useState(0)
@@ -115,6 +115,11 @@ export function Groups() {
 
   return (
     <Screen title="Group Stage" back="/">
+      {submitted && (
+        <div style={{ marginBottom: 'var(--wc-space-3)', textAlign: 'center' }}>
+          <Chip tone="green">🔒 Bracket submitted — picks are locked</Chip>
+        </div>
+      )}
       <div className={styles.pills}>
         {groups.map((g, i) => (
           <button
@@ -149,7 +154,6 @@ export function Groups() {
               teamIds={current.teamIds}
               ranks={currentRanks}
               onPickTeam={(id) => cycleGroupPick(current.id, id)}
-              onClear={() => clearGroup(current.id)}
             />
           </motion.div>
         </AnimatePresence>

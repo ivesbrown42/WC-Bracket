@@ -13,6 +13,14 @@ export function SetPassword() {
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
+  const pwError =
+    pw.length > 0 && pw.length < 6
+      ? 'Password must be at least 6 characters.'
+      : confirm.length > 0 && pw !== confirm
+        ? 'Passwords don’t match.'
+        : null
+  const pwMatch = pw.length >= 6 && confirm.length > 0 && pw === confirm
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (pw.length < 6) return setError('Password must be at least 6 characters.')
@@ -51,6 +59,8 @@ export function SetPassword() {
             onChange={(e) => setConfirm(e.target.value)}
             required
           />
+          {pwError && <p className={styles.error}>{pwError}</p>}
+          {pwMatch && <p className={styles.ok}>Passwords match ✓</p>}
           {error && <p className={styles.error}>{error}</p>}
           <Button type="submit" variant="gold" size="lg" block disabled={saving || !pw || !confirm}>
             {saving ? 'Saving…' : 'Save password'}

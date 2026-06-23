@@ -18,6 +18,8 @@ export const emptyPicks = (): BracketPicks => ({
 
 interface BracketState {
   picks: BracketPicks
+  /** Once submitted, the bracket is locked — all edits are ignored. */
+  submitted: boolean
   /**
    * Tap a team to rank it next in its group. Tapping a ranked team unranks
    * it (and anything after it). Group is complete after 2 picks.
@@ -32,6 +34,10 @@ interface BracketState {
   setTheme: (theme: TeamTheme) => void
   /** Replace all picks (used when importing a shared bracket). */
   loadPicks: (picks: BracketPicks) => void
+  /** Lock the bracket — final, no further edits. */
+  submit: () => void
+  /** Set the locked flag (used to sync from the server's locked_at on load). */
+  setSubmitted: (value: boolean) => void
   resetAll: () => void
 }
 
@@ -39,40 +45,81 @@ function persist(picks: BracketPicks) {
   adapter.save(picks)
 }
 
+const SUBMITTED_KEY = 'wc-bracket-submitted'
+function loadSubmitted(): boolean {
+  try {
+    return localStorage.getItem(SUBMITTED_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+function saveSubmitted(value: boolean) {
+  try {
+    localStorage.setItem(SUBMITTED_KEY, String(value))
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Keep each group's ranks to real members of that group, capped at the top 2.
+ * Heals stale/corrupt data (older builds ranked 3rd/4th, or a stray team id
+ * from a renamed team could linger). Without this a phantom team could flow
+ * into the knockout bracket as a group's winner.
+ */
+function sanitizeGroupRanks(
+  raw: BracketPicks['groupRanks'] | undefined,
+): BracketPicks['groupRanks'] {
+  const out: BracketPicks['groupRanks'] = {}
+  for (const g of groups) {
+    const members = new Set(g.teamIds)
+    const ranks = (raw?.[g.id] ?? []).filter((id) => members.has(id)).slice(0, 2)
+    if (ranks.length) out[g.id] = ranks
+  }
+  return out
+}
+
 function normalizePicks(raw: BracketPicks | null): BracketPicks {
   if (!raw) return emptyPicks()
+  const groupTeamIds = new Set(groups.flatMap((g) => g.teamIds))
   return {
     ...emptyPicks(),
     ...raw,
-    qualifiedThirdTeamIds: raw.qualifiedThirdTeamIds ?? [],
+    groupRanks: sanitizeGroupRanks(raw.groupRanks),
+    // Thirds must be valid teams not promoted to a group's top 2.
+    qualifiedThirdTeamIds: (raw.qualifiedThirdTeamIds ?? []).filter((id) =>
+      groupTeamIds.has(id),
+    ),
     theme: normalizeTheme(raw.theme),
   }
 }
 
 export const useBracketStore = create<BracketState>((set) => ({
   picks: normalizePicks(adapter.load()),
+  submitted: loadSubmitted(),
 
   cycleGroupPick: (group, teamId) =>
     set((state) => {
-      const current = state.picks.groupRanks[group] ?? []
+      if (state.submitted) return {} // locked
+      const groupTeamIds = new Set(groups.find((g) => g.id === group)!.teamIds)
+      // Sanitize stored ranks: keep only real members of THIS group, capped at
+      // the top 2. Heals stale data that ranked 3rd/4th or held a stray team id.
+      const current = (state.picks.groupRanks[group] ?? [])
+        .filter((id) => groupTeamIds.has(id))
+        .slice(0, 2)
       let next: string[]
 
       if (current.includes(teamId)) {
-        next = current.slice(0, current.indexOf(teamId))
-      } else if (current.length < 4) {
+        // Tapping a picked team removes just that one (freely editable).
+        next = current.filter((id) => id !== teamId)
+      } else if (current.length < 2) {
         next = [...current, teamId]
-        if (next.length === 3) {
-          const remaining = groups
-            .find((g) => g.id === group)!
-            .teamIds.filter((id) => !next.includes(id))
-          if (remaining.length === 1) next = [...next, remaining[0]]
-        }
       } else {
-        next = current
+        // Both slots full: swap the new team in for the current runner-up.
+        next = [current[0], teamId]
       }
 
       // Keep qualifiedThirdTeamIds consistent with new top-2
-      const groupTeamIds = new Set(groups.find((g) => g.id === group)!.teamIds)
       let qualifiedThirdTeamIds = state.picks.qualifiedThirdTeamIds ?? []
 
       if (next.length < 2) {
@@ -112,6 +159,7 @@ export const useBracketStore = create<BracketState>((set) => ({
 
   toggleThird: (teamId) =>
     set((state) => {
+      if (state.submitted) return {} // locked
       const current = state.picks.qualifiedThirdTeamIds ?? []
       const has = current.includes(teamId)
       let qualifiedThirdTeamIds: string[]
@@ -133,6 +181,7 @@ export const useBracketStore = create<BracketState>((set) => ({
 
   pickKnockout: (matchId, side) =>
     set((state) => {
+      if (state.submitted) return {} // locked
       const picks: BracketPicks = {
         ...state.picks,
         knockoutPicks: { ...state.picks.knockoutPicks, [matchId]: side },
@@ -150,15 +199,31 @@ export const useBracketStore = create<BracketState>((set) => ({
 
   loadPicks: (picks) =>
     set(() => {
-      persist(picks)
-      return { picks }
+      // Normalize on load (incl. data pulled from Supabase) so stale/corrupt
+      // group ranks are healed before they reach scoring or the bracket tree.
+      const normalized = normalizePicks(picks)
+      persist(normalized)
+      return { picks: normalized }
+    }),
+
+  submit: () =>
+    set(() => {
+      saveSubmitted(true)
+      return { submitted: true }
+    }),
+
+  setSubmitted: (value) =>
+    set(() => {
+      saveSubmitted(value)
+      return { submitted: value }
     }),
 
   resetAll: () =>
     set(() => {
       const picks = emptyPicks()
       adapter.clear()
-      return { picks }
+      saveSubmitted(false)
+      return { picks, submitted: false }
     }),
 }))
 

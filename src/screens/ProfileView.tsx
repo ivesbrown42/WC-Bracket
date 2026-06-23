@@ -4,20 +4,27 @@ import { Screen } from '../components/layout/Screen'
 import { Avatar } from '../components/ui'
 import { getProfile, type BracketRow } from '../lib/db'
 import { fetchResults } from '../lib/results'
-import { reviewBracket, type BracketReview, type ReviewItem, type KnockoutStage } from '../data/scoring'
+import {
+  reviewBracket,
+  type BracketReview,
+  type ReviewItem,
+  type MatchReview,
+} from '../data/scoring'
+import type { RoundId } from '../data/types'
 import { getChampion } from '../data/bracketLogic'
 import { getTeam } from '../data/worldCup2026'
 import styles from './ProfileView.module.css'
 
 const EMPTY_RESULTS = { groupAdvancers: {}, bestThirds: [], reached: {}, matchups: {} }
 
-type TabId = 'groups' | 'R16' | 'QF' | 'SF' | 'final'
+type TabId = 'groups' | RoundId
 const TABS: { id: TabId; label: string }[] = [
   { id: 'groups', label: 'Groups' },
-  { id: 'R16', label: 'Round of 16' },
-  { id: 'QF', label: 'Quarters' },
-  { id: 'SF', label: 'Semis' },
-  { id: 'final', label: 'Final' },
+  { id: 'R32', label: 'R32' },
+  { id: 'R16', label: 'R16' },
+  { id: 'QF', label: 'QF' },
+  { id: 'SF', label: 'SF' },
+  { id: 'F', label: 'Final' },
 ]
 
 const STATUS_ICON: Record<ReviewItem['status'], string> = {
@@ -37,8 +44,34 @@ function TeamRow({ item }: { item: ReviewItem }) {
   )
 }
 
-function stageItems(review: BracketReview, stage: KnockoutStage): ReviewItem[] {
-  return review.stages.find((s) => s.stage === stage)?.items ?? []
+function MatchCard({ m, label }: { m: MatchReview; label: string }) {
+  const renderSide = (teamId: string | null) => {
+    const team = getTeam(teamId ?? undefined)
+    const isPick = teamId != null && m.pickedWinner === teamId
+    // The picked winner row carries the winner-correct color; the other is neutral.
+    const cls = [styles.row, isPick ? styles[`row_${m.winnerStatus}`] : '']
+      .filter(Boolean)
+      .join(' ')
+    return (
+      <div className={cls}>
+        <span className={styles.flag}>{team?.flag ?? '🏳️'}</span>
+        <span className={styles.teamName}>{team?.name ?? 'TBD'}</span>
+        {isPick && <span className={styles.crown} title="Your pick to win">👑</span>}
+        {isPick && <span className={styles.status}>{STATUS_ICON[m.winnerStatus]}</span>}
+      </div>
+    )
+  }
+
+  return (
+    <div className={styles.matchCard}>
+      <div className={styles.matchLabel}>{label}</div>
+      {renderSide(m.home)}
+      {renderSide(m.away)}
+      <div className={styles.matchupLine}>
+        Exact matchup {STATUS_ICON[m.matchupStatus]}
+      </div>
+    </div>
+  )
 }
 
 export function ProfileView() {
@@ -68,10 +101,11 @@ export function ProfileView() {
 
   const supported = getTeam(data.favoriteTeamId)
   const champion = getTeam(getChampion(data.bracket))
+  const roundData = tab !== 'groups' ? review.rounds.find((r) => r.round === tab) : null
+  const roundLabel = TABS.find((t) => t.id === tab)!.label
 
   return (
     <Screen title="Profile" back={() => navigate('/leaderboard')}>
-      {/* Header */}
       <div className={styles.header}>
         <Avatar teamId={data.favoriteTeamId} size={72} />
         <div className={styles.headInfo}>
@@ -91,7 +125,6 @@ export function ProfileView() {
         </div>
       </div>
 
-      {/* Sub-navigation */}
       <div className={styles.tabs}>
         {TABS.map((t) => (
           <button
@@ -104,7 +137,6 @@ export function ProfileView() {
         ))}
       </div>
 
-      {/* Content */}
       <div className={styles.content}>
         {tab === 'groups' && (
           <>
@@ -123,29 +155,15 @@ export function ProfileView() {
           </>
         )}
 
-        {(tab === 'R16' || tab === 'QF' || tab === 'SF') && (
-          <div className={styles.section}>
-            <p className={styles.sectionTitle}>Predicted to reach the {TABS.find((t) => t.id === tab)!.label}</p>
-            {stageItems(review, tab).map((it, i) => <TeamRow key={i} item={it} />)}
-            {stageItems(review, tab).length === 0 && (
+        {tab !== 'groups' && (
+          <>
+            {roundData && roundData.matches.some((m) => m.home || m.away) ? (
+              roundData.matches.map((m, i) => (
+                <MatchCard key={m.matchId} m={m} label={`${roundLabel} · ${i + 1}`} />
+              ))
+            ) : (
               <p className={styles.empty}>No picks for this round yet.</p>
             )}
-          </div>
-        )}
-
-        {tab === 'final' && (
-          <>
-            <div className={styles.section}>
-              <p className={styles.sectionTitle}>Predicted finalists</p>
-              {stageItems(review, 'F').map((it, i) => <TeamRow key={i} item={it} />)}
-            </div>
-            <div className={styles.section}>
-              <p className={styles.sectionTitle}>Predicted champion</p>
-              {stageItems(review, 'CHAMP').map((it, i) => <TeamRow key={i} item={it} />)}
-              {stageItems(review, 'CHAMP').length === 0 && (
-                <p className={styles.empty}>No champion picked yet.</p>
-              )}
-            </div>
           </>
         )}
       </div>

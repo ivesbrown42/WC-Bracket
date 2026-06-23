@@ -23,6 +23,14 @@ export function ProfileSetup() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const pwError =
+    pw.length > 0 && pw.length < 6
+      ? 'Password must be at least 6 characters.'
+      : confirm.length > 0 && pw !== confirm
+        ? 'Passwords don’t match.'
+        : null
+  const pwMatch = pw.length >= 6 && confirm.length > 0 && pw === confirm
+
   const canSave =
     name.trim().length > 0 && teamId !== null && pw.length >= 6 && pw === confirm
 
@@ -112,6 +120,8 @@ export function ProfileSetup() {
             onChange={(e) => setConfirm(e.target.value)}
             style={{ marginTop: 'var(--wc-space-2)' }}
           />
+          {pwError && <p className={`${styles.validation} ${styles.error}`}>{pwError}</p>}
+          {pwMatch && <p className={`${styles.validation} ${styles.ok}`}>Passwords match ✓</p>}
         </div>
 
         {error && <p className={styles.error}>{error}</p>}

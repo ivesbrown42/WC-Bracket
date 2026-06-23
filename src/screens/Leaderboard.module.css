@@ -2,7 +2,19 @@
   font-size: var(--wc-text-sm);
   color: var(--wc-color-ink-soft);
   text-align: center;
-  margin: 0 0 var(--wc-space-4);
+  margin: 0 0 var(--wc-space-2);
+}
+
+.scoringLink {
+  display: block;
+  margin: 0 auto var(--wc-space-4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--wc-text-sm);
+  color: var(--wc-color-accent-red);
+  text-decoration: underline;
+  font-weight: 600;
 }
 
 .empty {
@@ -21,18 +33,24 @@
 .search {
   width: 100%;
   box-sizing: border-box;
-  padding: var(--wc-space-2) var(--wc-space-3);
+  padding: 14px 16px;
   margin-bottom: var(--wc-space-3);
-  border: 1.5px solid var(--wc-color-border);
+  border: 2px solid var(--wc-color-border);
   border-radius: var(--wc-radius-md);
-  font-size: var(--wc-text-sm);
+  font-size: var(--wc-text-base);
   font-family: var(--wc-font-body);
-  background: var(--wc-color-surface);
+  background: #fff;
   color: var(--wc-color-ink);
   outline: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.search::placeholder {
+  color: var(--wc-color-ink-faint);
 }
 .search:focus {
   border-color: var(--wc-color-accent-red);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--wc-color-accent-red) 18%, transparent);
 }
 
 .card {

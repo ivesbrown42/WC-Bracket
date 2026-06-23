@@ -120,10 +120,17 @@ describe('reviewBracket', () => {
     expect(groupB.items.every((i) => i.status === 'pending')).toBe(true)
   })
 
-  it('reports total points alongside the breakdown', () => {
+  it('reports total points and per-round matches with winner + matchup grading', () => {
     const picks = fullPicks()
     const review = reviewBracket(picks, resultsFromPicks(picks))
     expect(review.total).toBe(94)
-    expect(review.stages.find((s) => s.stage === 'CHAMP')!.items).toHaveLength(1)
+    // The Final round has exactly one match; against its own results both the
+    // winner pick and the matchup grade as correct.
+    const final = review.rounds.find((r) => r.round === 'F')!
+    expect(final.matches).toHaveLength(1)
+    expect(final.matches[0].winnerStatus).toBe('correct')
+    expect(final.matches[0].matchupStatus).toBe('correct')
+    // R32 has 16 matches.
+    expect(review.rounds.find((r) => r.round === 'R32')!.matches).toHaveLength(16)
   })
 })

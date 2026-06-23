@@ -142,3 +142,31 @@
   font-size: 1rem;
   flex-shrink: 0;
 }
+.crown {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+/* Match card (knockout tabs) */
+.matchCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--wc-space-2);
+  background: var(--wc-color-paper-raised);
+  border: 1.5px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-lg);
+}
+.matchLabel {
+  font-size: var(--wc-text-xs);
+  font-weight: var(--wc-weight-bold);
+  letter-spacing: var(--wc-tracking-wide);
+  text-transform: uppercase;
+  color: var(--wc-color-ink-faint);
+}
+.matchupLine {
+  font-size: var(--wc-text-xs);
+  color: var(--wc-color-ink-soft);
+  text-align: right;
+  padding: 2px 4px 0;
+}

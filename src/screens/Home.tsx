@@ -80,7 +80,7 @@ export function Home() {
                 variant="primary"
                 size="lg"
                 block
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/signup')}
               >
                 Start Your Bracket →
               </Button>

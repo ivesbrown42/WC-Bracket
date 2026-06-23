@@ -2,10 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Screen } from '../components/layout/Screen'
-import { Button, Chip, Confetti, Flag } from '../components/ui'
+import { Button, Chip, Confetti, Flag, ConfirmModal } from '../components/ui'
 import { MatchCard } from '../components/bracket/MatchCard'
-import { ThemeFrame } from '../components/theme'
 import { useBracketStore } from '../store/bracketStore'
+import { useAuthStore } from '../store/authStore'
+import { savePicks, lockPicks } from '../lib/db'
 import { knockoutMatches, getTeam } from '../data/worldCup2026'
 import { getChampion, knockoutReady, resolveKnockout } from '../data/bracketLogic'
 import type { RoundId } from '../data/types'
@@ -26,6 +27,25 @@ export function Bracket() {
   const navigate = useNavigate()
   const picks = useBracketStore((s) => s.picks)
   const pickKnockout = useBracketStore((s) => s.pickKnockout)
+  const submitted = useBracketStore((s) => s.submitted)
+  const submit = useBracketStore((s) => s.submit)
+  const user = useAuthStore((s) => s.user)
+
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async () => {
+    setSubmitting(true)
+    if (user) {
+      // Flush the latest picks first — after locking, RLS blocks further writes.
+      await savePicks(user.id, picks, getChampion(picks))
+      await lockPicks(user.id)
+    }
+    submit()
+    setSubmitting(false)
+    setConfirmOpen(false)
+    navigate('/summary')
+  }
 
   const ready = knockoutReady(picks)
   const resolved = useMemo(() => resolveKnockout(picks), [picks])
@@ -112,7 +132,6 @@ export function Bracket() {
   return (
     <Screen title="Knockout" back="/groups" wide>
       {party && <Confetti />}
-      <ThemeFrame />
 
       <div className={styles.tabs}>
         {ROUNDS.map((r) => {
@@ -149,9 +168,18 @@ export function Bracket() {
             <h2 className={styles.champName}>
               <Flag team={champion} size={32} /> {champion.name}
             </h2>
-            <Button variant="gold" onClick={() => navigate('/summary')}>
-              View & Share Bracket →
-            </Button>
+            {submitted ? (
+              <>
+                <Chip tone="green">✓ Bracket submitted — locked</Chip>
+                <Button variant="gold" onClick={() => navigate('/summary')}>
+                  View & Share Bracket →
+                </Button>
+              </>
+            ) : (
+              <Button variant="gold" onClick={() => setConfirmOpen(true)}>
+                Submit Bracket →
+              </Button>
+            )}
           </div>
         </motion.div>
       )}
@@ -161,6 +189,11 @@ export function Bracket() {
         <span className={styles.roundSub}>
           {decidedCount(round)} / {totalIn(round)} picked
         </span>
+        {submitted && (
+          <div style={{ marginTop: 'var(--wc-space-2)' }}>
+            <Chip tone="green">🔒 Submitted — locked</Chip>
+          </div>
+        )}
       </div>
 
       <motion.div
@@ -201,6 +234,21 @@ export function Bracket() {
       )}
 
       <div style={{ height: 32 }} />
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="Submit your bracket?"
+        message={
+          <>
+            Once you submit, your bracket is <strong>final</strong>. You won't be
+            able to change any picks afterward.
+          </>
+        }
+        confirmLabel="Submit"
+        confirming={submitting}
+        onConfirm={handleSubmit}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </Screen>
   )
 }

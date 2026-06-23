@@ -10,10 +10,12 @@ import { Bracket } from './screens/Bracket'
 import { Summary } from './screens/Summary'
 import { TeamThemeStudio } from './screens/TeamThemeStudio'
 import { Login } from './screens/Login'
+import { Signup } from './screens/Signup'
 import { Leaderboard } from './screens/Leaderboard'
 import { ProfileSetup } from './screens/ProfileSetup'
 import { ProfileView } from './screens/ProfileView'
 import { SetPassword } from './screens/SetPassword'
+import { HowScoring } from './screens/HowScoring'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user)
@@ -37,7 +39,9 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/share" element={<Summary shared />} />
+        <Route path="/scoring" element={<HowScoring />} />
         <Route path="/groups"        element={<RequireAuth><Groups /></RequireAuth>} />
         <Route path="/bracket"       element={<RequireAuth><Bracket /></RequireAuth>} />
         <Route path="/summary"       element={<RequireAuth><Summary /></RequireAuth>} />

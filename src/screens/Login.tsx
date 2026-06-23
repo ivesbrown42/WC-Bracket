@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Screen } from '../components/layout/Screen'
 import { Button } from '../components/ui'
 import { useAuthStore } from '../store/authStore'
@@ -6,7 +7,10 @@ import styles from './Login.module.css'
 
 type Mode = 'password' | 'magic'
 
+const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim())
+
 export function Login() {
+  const navigate = useNavigate()
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail)
   const signInWithPassword = useAuthStore((s) => s.signInWithPassword)
 
@@ -19,19 +23,21 @@ export function Login() {
 
   const handlePassword = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!isValidEmail(email)) return setError('Enter a valid email address.')
     setLoading(true)
     setError(null)
-    const { error: err } = await signInWithPassword(email, password)
+    const { error: err } = await signInWithPassword(email.trim(), password)
     setLoading(false)
     if (err) setError(err)
-    // On success, AuthSync + RequireAuth route the user onward automatically.
+    else navigate('/groups')
   }
 
   const handleMagic = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!isValidEmail(email)) return setError('Enter a valid email address.')
     setLoading(true)
     setError(null)
-    const { error: err } = await signInWithEmail(email)
+    const { error: err } = await signInWithEmail(email.trim())
     setLoading(false)
     if (err) setError(err)
     else setSent(true)
@@ -77,7 +83,6 @@ export function Login() {
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
               autoFocus
             />
             <input
@@ -93,7 +98,7 @@ export function Login() {
               {loading ? 'Signing in…' : 'Sign In →'}
             </Button>
             <button type="button" className={styles.skip} onClick={() => { setMode('magic'); setError(null) }}>
-              First time, or forgot password? Email me a link
+              Forgot password? Email me a sign-in link
             </button>
           </form>
         ) : (

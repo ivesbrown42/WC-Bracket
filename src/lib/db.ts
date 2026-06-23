@@ -26,6 +26,25 @@ export async function loadPicks(userId: string): Promise<BracketPicks | null> {
   return data.bracket as BracketPicks
 }
 
+/** Whether this user has already submitted (locked) their bracket. */
+export async function getLockStatus(userId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('picks')
+    .select('locked_at')
+    .eq('user_id', userId)
+    .maybeSingle()
+  return Boolean(data?.locked_at)
+}
+
+/** Lock the bracket — final submission. RLS only allows this once. */
+export async function lockPicks(userId: string) {
+  const { error } = await supabase
+    .from('picks')
+    .update({ locked_at: new Date().toISOString() })
+    .eq('user_id', userId)
+  if (error) console.error('lockPicks failed:', error.message)
+}
+
 export async function saveProfile(
   userId: string,
   displayName: string,
@@ -33,8 +52,10 @@ export async function saveProfile(
 ) {
   const { error } = await supabase
     .from('profiles')
-    .update({ display_name: displayName, favorite_team_id: favoriteTeamId })
-    .eq('id', userId)
+    .upsert(
+      { id: userId, display_name: displayName, favorite_team_id: favoriteTeamId },
+      { onConflict: 'id' },
+    )
   if (error) console.error('saveProfile failed:', error.message)
 }
 

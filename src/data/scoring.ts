@@ -157,14 +157,34 @@ export interface ReviewItem {
   teamId: string
   status: PickStatus
 }
+/** One knockout match as predicted, graded two ways. */
+export interface MatchReview {
+  matchId: string
+  home: string | null
+  away: string | null
+  pickedWinner: string | null
+  /** Did this exact pairing actually happen? (the matchup bonus) */
+  matchupStatus: PickStatus
+  /** Did the predicted winner actually advance? (the survival point) */
+  winnerStatus: PickStatus
+}
 export interface BracketReview {
   total: number
   /** Predicted top-2 advancers per group. */
   groups: { group: GroupId; items: ReviewItem[] }[]
   /** Predicted best-thirds. */
   thirds: ReviewItem[]
-  /** Predicted teams reaching each knockout stage. */
-  stages: { stage: KnockoutStage; items: ReviewItem[] }[]
+  /** Predicted matches per knockout round, with winner + matchup grading. */
+  rounds: { round: RoundId; matches: MatchReview[] }[]
+}
+
+/** Round → the stage its winners reach (for grading the winner pick). */
+const ROUND_TO_NEXT_STAGE: Record<string, KnockoutStage> = {
+  R32: 'R16',
+  R16: 'QF',
+  QF: 'SF',
+  SF: 'F',
+  F: 'CHAMP',
 }
 
 const statusVs = (known: boolean, actual: Set<string>, teamId: string): PickStatus =>
@@ -197,22 +217,44 @@ export function reviewBracket(
     status: statusVs(thirdsKnown, thirdsSet, teamId),
   }))
 
-  const stages: BracketReview['stages'] = []
-  for (const stage of Object.keys(STAGE_SOURCE_ROUND) as KnockoutStage[]) {
-    const round = STAGE_SOURCE_ROUND[stage]
-    const predicted = list
-      .filter((m) => m.round === round && m.winnerTeamId)
-      .map((m) => m.winnerTeamId!)
-    if (predicted.length === 0) continue
-    const actual = results.reached[stage]
-    const set = new Set(actual ?? [])
-    stages.push({
-      stage,
-      items: predicted.map((teamId) => ({ teamId, status: statusVs(!!actual, set, teamId) })),
-    })
+  const rounds: BracketReview['rounds'] = []
+  for (const round of ELIM_ROUNDS) {
+    const nextStage = ROUND_TO_NEXT_STAGE[round]
+    const reached = results.reached[nextStage]
+    const reachedKnown = !!reached
+    const reachedSet = new Set(reached ?? [])
+    const pairs = results.matchups[round]
+    const pairsKnown = !!pairs
+    const pairKeys = new Set((pairs ?? []).map((p) => pairKey(p.home, p.away)))
+
+    const matches: MatchReview[] = list
+      .filter((m) => m.round === round)
+      .map((m) => {
+        const matchupStatus: PickStatus =
+          !m.homeTeamId || !m.awayTeamId || !pairsKnown
+            ? 'pending'
+            : pairKeys.has(pairKey(m.homeTeamId, m.awayTeamId))
+              ? 'correct'
+              : 'wrong'
+        const winnerStatus: PickStatus =
+          !m.winnerTeamId || !reachedKnown
+            ? 'pending'
+            : reachedSet.has(m.winnerTeamId)
+              ? 'correct'
+              : 'wrong'
+        return {
+          matchId: m.id,
+          home: m.homeTeamId,
+          away: m.awayTeamId,
+          pickedWinner: m.winnerTeamId,
+          matchupStatus,
+          winnerStatus,
+        }
+      })
+    rounds.push({ round, matches })
   }
 
-  return { total: scoreBracket(picks, results).total, groups, thirds, stages }
+  return { total: scoreBracket(picks, results).total, groups, thirds, rounds }
 }
 
 /**

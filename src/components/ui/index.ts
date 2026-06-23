@@ -1,4 +1,5 @@
 export { Avatar } from './Avatar'
+export { ConfirmModal } from './ConfirmModal'
 export { StickerCard } from './StickerCard'
 export { Button } from './Button'
 export { Badge } from './Badge'

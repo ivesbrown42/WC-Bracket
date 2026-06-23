@@ -31,20 +31,26 @@
 
 .input {
   width: 100%;
-  padding: var(--wc-space-3) var(--wc-space-4);
+  padding: 14px 16px;
   border: 2px solid var(--wc-color-border);
   border-radius: var(--wc-radius-md);
   font-size: var(--wc-text-base);
   font-family: var(--wc-font-body);
-  background: var(--wc-color-surface);
+  background: #fff;
   color: var(--wc-color-ink);
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.15s;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input::placeholder {
+  color: var(--wc-color-ink-faint);
 }
 
 .input:focus {
   border-color: var(--wc-color-accent-red);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--wc-color-accent-red) 18%, transparent);
 }
 
 .teamGrid {
@@ -82,6 +88,31 @@
   margin: 0;
 }
 
+.ok {
+  font-size: var(--wc-text-sm);
+  color: #1f9d55;
+  margin: 0;
+}
+
+.validation {
+  font-size: var(--wc-text-sm);
+  margin: var(--wc-space-1) 0 0;
+}
+
 .actions {
   padding-top: var(--wc-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-space-3);
+  align-items: center;
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--wc-text-sm);
+  color: var(--wc-color-ink-soft);
+  text-decoration: underline;
+  padding: 0;
 }
