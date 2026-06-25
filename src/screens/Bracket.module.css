@@ -52,6 +52,17 @@
   margin-right: auto;
 }
 
+/* Phones: collapse the two-column grid so cards aren't squished — scroll
+   down through the matches instead. */
+@media (max-width: 640px) {
+  .matches {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 .roundHead {
   text-align: center;
   margin: var(--wc-space-2) 0 var(--wc-space-1);
