@@ -50,21 +50,29 @@ export function HowScoring() {
               an elimination match — i.e. you called the exact matchup.
             </span>
           </li>
+          <li className={styles.rule}>
+            <span className={styles.pts}>+{POINTS.finalistBonus}</span>
+            <span className={styles.ruleText}>
+              <strong>extra</strong> for each team you pick that actually reaches
+              the <strong>Final</strong> — on top of the point for getting there.
+            </span>
+          </li>
         </ul>
         <p className={styles.note}>
           So getting both teams of a real quarter-final right is worth more than
           just picking one winner — you score for the matchup <em>and</em> the
-          survivors.
+          survivors. And calling a finalist is worth a hefty{' '}
+          {POINTS.finalistBonus + POINTS.reachRound} points all in.
         </p>
       </section>
 
       {/* Max */}
       <section className={styles.maxBox}>
-        <span className={styles.maxNum}>94</span>
+        <span className={styles.maxNum}>104</span>
         <span className={styles.maxLabel}>
           points for a perfect bracket
           <span className={styles.maxBreak}>
-            24 groups · 8 thirds · 31 winners · 31 matchups
+            24 groups · 8 thirds · 31 winners · 31 matchups · 10 finalists
           </span>
         </span>
       </section>

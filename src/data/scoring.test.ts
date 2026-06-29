@@ -28,7 +28,7 @@ const EMPTY_RESULTS: TournamentResults = {
 }
 
 describe('scoreBracket', () => {
-  it('a perfect bracket scores the maximum 94 with correct breakdown', () => {
+  it('a perfect bracket scores the maximum 104 with correct breakdown', () => {
     const picks = fullPicks()
     const results = resultsFromPicks(picks)
     const s = scoreBracket(picks, results)
@@ -37,10 +37,25 @@ describe('scoreBracket', () => {
     expect(s.thirdsPoints).toBe(8) // 8 best-thirds
     expect(s.knockoutPoints).toBe(31) // 16+8+4+2+1 survival
     expect(s.bonusPoints).toBe(31) // 16+8+4+2+1 matchups
-    expect(s.total).toBe(94)
+    expect(s.finalistPoints).toBe(10) // 2 finalists × 5
+    expect(s.total).toBe(104)
 
     expect(s.reachedByStage).toEqual({ R16: 16, QF: 8, SF: 4, F: 2, CHAMP: 1 })
     expect(s.bonusByRound).toEqual({ R32: 16, R16: 8, QF: 4, SF: 2, F: 1 })
+  })
+
+  it('awards +5 per correct finalist, on top of the survival point', () => {
+    const picks = fullPicks()
+    const full = resultsFromPicks(picks)
+    // Only the Final stage is known: the two real finalists reached it.
+    const results: TournamentResults = {
+      ...EMPTY_RESULTS,
+      reached: { F: full.reached.F },
+    }
+    const s = scoreBracket(picks, results)
+    expect(s.finalistPoints).toBe(10) // 2 finalists × 5
+    expect(s.knockoutPoints).toBe(2) // +1 survival each
+    expect(s.total).toBe(12)
   })
 
   it('scores nothing against empty results', () => {
@@ -123,7 +138,7 @@ describe('reviewBracket', () => {
   it('reports total points and per-round matches with winner + matchup grading', () => {
     const picks = fullPicks()
     const review = reviewBracket(picks, resultsFromPicks(picks))
-    expect(review.total).toBe(94)
+    expect(review.total).toBe(104)
     // The Final round has exactly one match; against its own results both the
     // winner pick and the matchup grade as correct.
     const final = review.rounds.find((r) => r.round === 'F')!

@@ -14,8 +14,11 @@ import { resolveKnockout } from './bracketLogic'
  *               (R16, QF, SF, Final, Champion)
  *  - Bonus:     +1 for each elimination matchup where you predicted BOTH teams
  *               (the exact pairing that actually happened)
+ *  - Finalist:  +5 EXTRA for each team you pick that actually reaches the Final
+ *               (on top of the survival point for reaching it)
  *
- * A perfect bracket scores 94: 24 group + 8 thirds + 31 survival + 31 bonus.
+ * A perfect bracket scores 104:
+ *   24 group + 8 thirds + 31 survival + 31 bonus + 10 finalist (2 × 5).
  */
 
 export const POINTS = {
@@ -23,6 +26,8 @@ export const POINTS = {
   bestThird: 1,
   reachRound: 1,
   matchupBonus: 1,
+  /** Extra reward for each correctly-predicted finalist (reaches the Final). */
+  finalistBonus: 5,
 } as const
 
 /** Knockout "reached this round" stages, and the round whose winners reach it. */
@@ -56,6 +61,8 @@ export interface ScoreBreakdown {
   thirdsPoints: number
   knockoutPoints: number
   bonusPoints: number
+  /** Extra points from correctly-predicted finalists (+5 each). */
+  finalistPoints: number
   /** Per-knockout-stage correct counts (for profile detail views). */
   reachedByStage: Record<KnockoutStage, number>
   /** Per-round correct matchup counts. */
@@ -137,12 +144,17 @@ export function scoreBracket(
     if (n > 0) bonusByRound[round] = n
   }
 
+  // --- Finalist bonus: +5 extra for each predicted team that reaches the Final.
+  // reachedByStage.F already counts correct finalists (the two SF winners).
+  const finalistPoints = reachedByStage.F * POINTS.finalistBonus
+
   return {
-    total: groupPoints + thirdsPoints + knockoutPoints + bonusPoints,
+    total: groupPoints + thirdsPoints + knockoutPoints + bonusPoints + finalistPoints,
     groupPoints,
     thirdsPoints,
     knockoutPoints,
     bonusPoints,
+    finalistPoints,
     reachedByStage,
     bonusByRound,
   }
