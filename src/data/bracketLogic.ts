@@ -5,13 +5,17 @@ import type {
   SlotSource,
 } from './types'
 import { groupIds, knockoutMatches, getTeam } from './worldCup2026'
+import { THIRD_PLACE_ALLOCATION } from './thirdPlaceAllocation'
 
 export const THIRDS_REQUIRED = 8
 
 /**
  * Allowed group-set for each of the 8 R32 third-place slots, indexed by the
  * `third` slot index (0–7) used in `r32Sources`. Mirrors the official 2026
- * bracket (FIFA match numbers in comments).
+ * bracket (FIFA match numbers in comments). This is the union of groups that
+ * can occupy each slot across all 495 Annex C combinations — useful for
+ * validation; the exact per-combination assignment lives in
+ * `THIRD_PLACE_ALLOCATION`.
  */
 export const THIRD_SLOT_GROUPS: GroupId[][] = [
   ['A', 'B', 'C', 'D', 'F'], // slot 0 · M74
@@ -25,44 +29,39 @@ export const THIRD_SLOT_GROUPS: GroupId[][] = [
 ]
 
 /**
- * Assign the user's chosen best-thirds to the 8 R32 third slots, respecting
- * each slot's allowed group-set. Returns slotIndex -> teamId.
+ * Assign the user's chosen best-thirds to the 8 R32 third slots using FIFA's
+ * official allocation (Regulations Annex C). Returns slotIndex -> teamId.
  *
- * FIFA publishes a fixed 495-row table (one per possible combination of the 8
- * qualifying groups). We compute a valid bijection via bipartite matching —
- * one always exists because the slot group-sets are designed to cover every
- * combination. This is exact for survival scoring (a third either reaches R32
- * or not, regardless of slot); it can differ from FIFA's table only in how an
- * equally-valid matching is chosen, which affects the third-matchup bonus.
+ * FIFA publishes a fixed 495-row table, one per combination of the 8 groups
+ * whose third-placed team qualifies. The allocation is a property of the whole
+ * combination — it is NOT decomposable into independent per-slot group-sets —
+ * so we look up the combination directly (`THIRD_PLACE_ALLOCATION`) instead of
+ * computing an arbitrary valid bijection. Each group sends at most one third
+ * (enforced upstream), so the qualified groups form a unique lookup key.
+ *
+ * Returns an empty map until exactly 8 distinct groups have qualified, since
+ * the table is only defined for a complete combination (knockout rendering is
+ * gated on `thirdsComplete`).
  */
 export function assignThirds(thirdTeamIds: string[]): Map<number, string> {
-  const teams = thirdTeamIds.slice(0, THIRDS_REQUIRED)
-  const slotToTeam = new Array<number>(THIRDS_REQUIRED).fill(-1)
-  const groupOf = (id: string): GroupId | undefined => getTeam(id)?.group
-
-  // Kuhn's algorithm — deterministic given a fixed team/slot order.
-  const augment = (t: number, seen: boolean[]): boolean => {
-    const g = groupOf(teams[t])
-    if (!g) return false
-    for (let s = 0; s < THIRD_SLOT_GROUPS.length; s++) {
-      if (seen[s] || !THIRD_SLOT_GROUPS[s].includes(g)) continue
-      seen[s] = true
-      if (slotToTeam[s] === -1 || augment(slotToTeam[s], seen)) {
-        slotToTeam[s] = t
-        return true
-      }
-    }
-    return false
-  }
-
-  for (let t = 0; t < teams.length; t++) {
-    augment(t, new Array<boolean>(THIRD_SLOT_GROUPS.length).fill(false))
-  }
-
   const result = new Map<number, string>()
-  for (let s = 0; s < slotToTeam.length; s++) {
-    if (slotToTeam[s] !== -1) result.set(s, teams[slotToTeam[s]])
+
+  // One qualified third per group → group -> teamId.
+  const teamByGroup = new Map<GroupId, string>()
+  for (const id of thirdTeamIds.slice(0, THIRDS_REQUIRED)) {
+    const g = getTeam(id)?.group
+    if (g) teamByGroup.set(g, id)
   }
+  if (teamByGroup.size !== THIRDS_REQUIRED) return result
+
+  const key = [...teamByGroup.keys()].sort().join('')
+  const slotGroups = THIRD_PLACE_ALLOCATION[key]
+  if (!slotGroups) return result // unreachable for any valid 8-group combination
+
+  slotGroups.forEach((group, slot) => {
+    const teamId = teamByGroup.get(group)
+    if (teamId) result.set(slot, teamId)
+  })
   return result
 }
 

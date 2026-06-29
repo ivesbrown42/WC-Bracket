@@ -137,4 +137,23 @@ describe('best-thirds slot assignment', () => {
     expect(assignment.get(5)).toBe(kTeam)
     expect(assignment.get(7)).toBe(lTeam)
   })
+
+  it('slots thirds by FIFA Annex C, not just any valid bijection', () => {
+    // Reported symptom: with thirds qualifying from groups B,F,G,H,I,J,K,L,
+    // FIFA Annex C sends Group B's third to slot 2 — the Round-of-32 match
+    // against the Group D winner (the USA's seed). The previous "any valid
+    // bijection" matcher instead dropped B into slot 0 (vs the Group E winner),
+    // i.e. "Bosnia v Germany" instead of "Bosnia v USA".
+    const combo = ['B', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+    const expectedGroupBySlot = ['F', 'G', 'B', 'I', 'H', 'K', 'J', 'L']
+    const thirdIds = combo.map((g) => groups.find((gr) => gr.id === g)!.teamIds[2])
+
+    const assignment = assignThirds(thirdIds)
+    const groupBySlot = Array.from({ length: 8 }, (_, s) =>
+      getTeam(assignment.get(s)!)?.group,
+    )
+    expect(groupBySlot).toEqual(expectedGroupBySlot)
+    // Specifically: the Group D winner (USA) faces Group B's third in slot 2.
+    expect(getTeam(assignment.get(2)!)?.group).toBe('B')
+  })
 })
