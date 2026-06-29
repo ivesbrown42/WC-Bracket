@@ -59,6 +59,75 @@ describe('best-thirds selection', () => {
   })
 })
 
+describe('official FIFA 2026 bracket structure', () => {
+  // Independent oracle: FIFA's official Round-of-32 slots (match numbers M73-M88),
+  // transcribed from the published knockout bracket. winner=1X, runner=2X,
+  // third=3#slotIndex. The code's r32Sources must reproduce this exactly.
+  const OFFICIAL_R32: [string, string][] = [
+    ['1E', '3#0'], // R32-1  · M74
+    ['1I', '3#1'], // R32-2  · M77
+    ['2A', '2B'], // R32-3  · M73
+    ['1F', '2C'], // R32-4  · M75
+    ['2K', '2L'], // R32-5  · M83
+    ['1H', '2J'], // R32-6  · M84
+    ['1D', '3#2'], // R32-7  · M81  (USA = 1D)
+    ['1G', '3#3'], // R32-8  · M82
+    ['1C', '2F'], // R32-9  · M76
+    ['2E', '2I'], // R32-10 · M78
+    ['1A', '3#4'], // R32-11 · M79  (Mexico = 1A)
+    ['1L', '3#5'], // R32-12 · M80
+    ['1J', '2H'], // R32-13 · M86
+    ['2D', '2G'], // R32-14 · M88
+    ['1B', '3#6'], // R32-15 · M85
+    ['1K', '3#7'], // R32-16 · M87
+  ]
+
+  const describeSource = (s: { kind: string; group?: string; index?: number; matchId?: string }): string => {
+    switch (s.kind) {
+      case 'winner':
+        return `1${s.group}`
+      case 'runner':
+        return `2${s.group}`
+      case 'third':
+        return `3#${s.index}`
+      case 'matchWinner':
+        return `W:${s.matchId}`
+      case 'matchLoser':
+        return `L:${s.matchId}`
+      default:
+        return '?'
+    }
+  }
+
+  it('seeds all 16 Round-of-32 matches exactly as FIFA M73-M88', () => {
+    OFFICIAL_R32.forEach(([home, away], i) => {
+      const m = knockoutMatches.find((x) => x.id === `R32-${i + 1}`)!
+      expect([describeSource(m.home), describeSource(m.away)]).toEqual([home, away])
+    })
+  })
+
+  it('chains R16 from consecutive R32 winners (official W-pairings)', () => {
+    // R16-1 = W74×W77, R16-2 = W73×W75, R16-3 = W83×W84, R16-4 = W81×W82,
+    // R16-5 = W76×W78, R16-6 = W79×W80, R16-7 = W86×W88, R16-8 = W85×W87.
+    for (let i = 1; i <= 8; i++) {
+      const m = knockoutMatches.find((x) => x.id === `R16-${i}`)!
+      expect(describeSource(m.home)).toBe(`W:R32-${i * 2 - 1}`)
+      expect(describeSource(m.away)).toBe(`W:R32-${i * 2}`)
+    }
+  })
+
+  it('chains QF/SF/Final from prior-round winners and the 3rd-place from SF losers', () => {
+    const counts = { R32: 0, R16: 0, QF: 0, SF: 0, F: 0, TP: 0 } as Record<string, number>
+    for (const m of knockoutMatches) counts[m.round]++
+    expect(counts).toEqual({ R32: 16, R16: 8, QF: 4, SF: 2, F: 1, TP: 1 })
+
+    const final = knockoutMatches.find((m) => m.id === 'F-1')!
+    expect([describeSource(final.home), describeSource(final.away)]).toEqual(['W:SF-1', 'W:SF-2'])
+    const third = knockoutMatches.find((m) => m.id === 'TP-1')!
+    expect([describeSource(third.home), describeSource(third.away)]).toEqual(['L:SF-1', 'L:SF-2'])
+  })
+})
+
 describe('knockout resolution', () => {
   it('seeds R32 from group picks (winner / runner / third)', () => {
     const resolved = resolveKnockout(fullPicks())
